@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 #ifndef RT_CONFIG_H__
 #define RT_CONFIG_H__
 
@@ -199,6 +194,11 @@
 
 /* multimedia packages */
 
+/* LVGL: powerful and easy-to-use embedded GUI library */
+
+
+/* u8g2: a monochrome graphic library */
+
 
 /* tools packages */
 
@@ -206,6 +206,9 @@
 /* system packages */
 
 /* acceleration: Assembly language or algorithmic acceleration packages */
+
+
+/* CMSIS: ARM Cortex-M Microcontroller Software Interface Standard */
 
 
 /* Micrium: Micrium software products porting for RT-Thread */
@@ -218,7 +221,6 @@
 
 
 /* miscellaneous packages */
-
 
 /* samples: kernel and components samples */
 

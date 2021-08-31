@@ -1,13 +1,3 @@
-/*
- * This file is part of the OpenMV project.
- *
- * Copyright (c) 2013-2019 Ibrahim Abdelkader <iabdalkader@openmv.io>
- * Copyright (c) 2013-2019 Kwabena W. Agyeman <kwagyeman@openmv.io>
- *
- * This work is licensed under the MIT license, see the file LICENSE for details.
- *
- * Contrast Limited Adaptive Histogram Equalization.
- */
 #include <stdint.h>
 const uint16_t rainbow_table[256] = {
     0x3F06, 0x3F06, 0x5F06, 0x7F06, 0x9F06, 0xBF06, 0xBF06, 0xDF06,

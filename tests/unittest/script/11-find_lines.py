@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 def unittest(data_path, temp_path):
     import image
     img = image.Image("/sd/unittest/data/shapes.ppm", copy_to_fb=True)

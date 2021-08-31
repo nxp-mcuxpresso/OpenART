@@ -135,7 +135,7 @@ def open_png(decoder, dsc):
     if COLOR_SIZE == 4:
         convert_rgba8888_to_bgra8888(img_view)
     elif COLOR_SIZE == 2:
-        if COLOR_IS_SWAPPED:
+        if COLOR_IS_SWAPPED == False:
             convert_rgba8888_to_swapped_bgra5658(img_view)
         else:
             convert_rgba8888_to_bgra5658(img_view)

@@ -1,0 +1,30 @@
+from building import *
+
+cwd = GetCurrentDir()
+
+src = []
+path =  [cwd,cwd + '/config']
+CPPDEFINES = []
+LOCAL_OPTIM = '-O0'
+
+
+# add usb device driver code
+if (GetDepend('NXP_USING_USB_STACK')):
+	CPPDEFINES += ['ENDIANNESS']
+	
+	src += Glob('phy/*.c')
+	src += Glob('app/*.c')
+	src += Glob('device/*.c')
+	path  += [cwd + '/app']		
+	path  += [cwd + '/include']	
+	path  += [cwd + '/phy']
+	path  += [cwd + '/device']	
+
+if GetDepend('NXP_USING_OPENMV'):
+	src += Glob('omv/*.c')
+	path  += [cwd + '/omv']	
+
+
+group = DefineGroup('usb', src, depend = ['NXP_USING_USB_STACK'], CPPPATH = path, CPPDEFINES=CPPDEFINES)
+
+Return('group')

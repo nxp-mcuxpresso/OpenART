@@ -1,14 +1,3 @@
-/* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-==============================================================================*/
 #pragma once
 #if defined(__cplusplus)
 extern "C" {
@@ -414,7 +403,7 @@ Internal used data structures and macro defines, put here as reference
 
 #define CICMD_STRING (CIOP_STRING << 8)
 
-// О©╫О©╫О©╫б╧О©╫О©╫ъ╨О©╫О©╫О©╫О©╫О©╫О©╫О©╫х║О©╫О©╫О©╫О©╫О©╫О©╫О©╫п╣д╡О©╫м╛О©╫О©╫О©╫О©╫
+// ртоб╧╓╬ъ╨ЙсцсзлАх║╦ВкЦвсжп╣д╡╩м╛╡нйЩ
 #define IB (q7_t*)(pCtx->bufs[p->ib].pv)
 #define OB (q7_t*)(pCtx->bufs[p->ob].pv)
 #define IB0 (q7_t*)(pCtx->bufs[p->ibs[0]].pv)
@@ -501,7 +490,7 @@ const char* CI_GetModelStringXIP(const void* pvModel);
  this is the case if you use CI_RunModelXXX family APIs*/
 void CI_ConfigPostProcess(CI_Context * pCtx, uint8_t isEnabled);
 
-// О©╫О©╫О©╫О©╫О©╫г╠х╫о╣м╪О©╫О©╫О©╫О©╫з╡О©╫й╧О©╫ц╣О©╫API
+// ртобйг╠х╫о╣м╪╤╩Рдз╡©й╧сц╣дAPI
 // modelHandle: A user-interpreted value to identify the model to run, usually useful for non-xip models to identify which model.
 // pUserCtx: pointer to context of this CI engine. If zero, CI will try to use its default context, but only OK if the context is not inuse
 // pfnReadData: pointer to a function that read data from non-xip models. If zero, will use the default reader in the port.
@@ -513,7 +502,7 @@ int CI_zzCreateContextNonXIP(uint32_t modelHandle, CI_UserContext* pUserCtx, voi
 int CI_zzCreateContextXIP(uint32_t modelHandle, CI_UserContext*pUserCtx, void *pvOutBuf, const void *pvModel);
 
 // >>>>>>>>>
-// О©╫О©╫дёО©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫м╥О©╫х╗О©╫ь║О©╫ф╚О©╫ц║О©╫О©╫О©╫О©╫О©╫XIPО©╫О©╫О©╫мёО©╫дёО©╫м╢Ф╢╒О©╫з©О©╫я╟ж╥О©╫д╣О©╫ж╥О©╫у╪О©╫О©╫пёО©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫м╥О©╫ж╩О©╫г╩О©╫х║ж╦О©╫О©╫дёО©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫щ╣О©╫ж╦О©╫О©╫
+// ╢сдёпмюОиЙгК╨мйм╥ех╗жь║╒ф╚жц║ё╤тсзXIPюЮпмё╗дёпм╢Ф╢╒тз©ия╟ж╥╣д╣ьж╥©у╪Джпё╘ё╛иЙгК╨мйм╥еж╩йг╩Ях║ж╦оРдёпмжпоЮ╧ьйЩ╬щ╣дж╦уК
 int AllocWeits(CI_Context *pCtx, CI_CmdHeader *pCmd, void* *ppWt, void* *ppWb, uint32_t bits);
 int FreeWeits(CI_Context* pCtx, CI_CmdHeader* pCmd, void** ppWt, void** ppWb, uint32_t bits);
 
@@ -532,7 +521,7 @@ extern int CIPort_DefaultReadData(uint32_t modelHandle, const CI_UserModelHeader
 extern int CIPort_EnterCritical(void);
 extern int CIPort_LeaveCritical(void);
 
-// О©╫О©╫О©╫б╨О©╫О©╫О©╫О©╫О©╫р╙О©╫О©╫О©╫з╦О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+// ртоб╨╞йЩжВр╙сцсз╦╗жЗ╣ВйтиЯ╬╜мЬбГ
 extern /*__WEAK*/ void CI_DebugRecoverFloat_q7(const q7_t* pcIn,
                                     float rcvr[],
                                     size_t rcvrBufSize,
@@ -557,16 +546,16 @@ typedef enum
   kRecover_bias,
 } RecoverType_enum;
 
-// О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫А╥╣О©╫ь╤О©╫л╛О©╫О©╫О©╫О©╫О©╫bufferО©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫CIPort_Free()О©╫О©╫О©╫м╥еёО©╫
+// уБ╦Ж╨╞йЩ╩А╥╣╩ь╤╞л╛╥жеД╣дbuffer║ё╠ьпК╣ВсцCIPort_Free()ртйм╥её║
 extern float* CI_RecoverOutputToFloat(CI_Context* pCtx, CI_CmdHeader* pCmd);
 extern float* CI_RecoverWeitToFloat(CI_Context* pCtx, CI_CmdHeader* pCmd);
 
-// О©╫О©╫О©╫б╧О©╫О©╫с╨О©╫О©╫О©╫О©╫О©╫д╛О©╫О©╫й╣О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫с╣д║О©╫О©╫ц╩О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫й╣О©╫О©╫О©╫т╦О©╫О©╫О©╫д╛О©╫О©╫й╣О©╫ж║О©╫д╛О©╫О©╫й╣О©╫ж╡О©╫О©╫О©╫О©╫н╨н╢О©╫О©╫О©╫О©╫О©╫р╩О©╫О©╫А╠╩О©╫е╩О©╫О©╫О©╫О©╫О©╫
-// в╒О©╫О©╫О©╫О©╫О©╫О©╫й╣О©╫О©╫О©╫О©╫п╘О©╫О©╫О©╫с╨О©╫О©╫О©╫й╠О©╫О©╫р╙О©╫О©╫й╧О©╫ц║О©╫__WEAKО©╫О©╫О©╫О©╫О©╫нёО©╫
-// О©╫О©╫GenericKernelО©╫п╧ь╣д╧О©╫О©╫с╨О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫н╤О©╫О©╫О©╫О©╫О©╫ц╣д║О©╫р╡О©╫О©╫О©╫О©╫к╣О©╫О©╫й╧О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫(Concat, ElementwiseOp)О©╫О©╫р╡О©╫О©╫О©╫О©╫ц║О©╫
-// О©╫О©╫О©╫О©╫кЁО©╫О©╫
-//    О©╫О©╫О©╫О©╫"Before"О©╫Ю╧ЁО©╫сёО©╫О©╫х╣О©╫О©╫О©╫CI_HookBeforeGenericKernelО©╫ы╣О©╫О©╫ц╦О©╫О©╫О©╫в╗О©╫ц╣д╧О©╫О©╫О©╫
-//    О©╫О©╫О©╫О©╫"After"О©╫Ю╧ЁО©╫сёО©╫О©╫х╣О©╫О©╫ц╦О©╫О©╫О©╫в╗О©╫ц╣д╧О©╫О©╫с╨О©╫О©╫О©╫О©╫О©╫О©╫О©╫CI_HookBeforeGenericKernel
+// ртоб╧Ёвс╨╞йЩ╣дд╛хой╣ожйгхУа╢╫с╣д║ёсц╩╖©иртжьпбй╣ожрт╦╡╦гд╛хой╣ож║ёд╛хой╣ож╡╩вЖхн╨н╢╕юМё╛р╩╟Ц╩А╠╩се╩╞╣Т║ё
+// в╒ё╨жьпбй╣ожуБп╘╧Ёвс╨╞йЩй╠╡╩р╙тый╧сц║╟__WEAK║╠пчйнё║
+// сКGenericKernelсп╧ь╣д╧Ёвс╨╞йЩйгнчбшхГ╨н╤╪╩А╣Всц╣д║ёр╡╬мйгк╣╪╢й╧йгльйБ╣дкЦвс(Concat, ElementwiseOp)ё╛р╡╩А╣Всц║ё
+// ╣ВсцкЁпРё╨
+//    ╤тсз"Before"юЮ╧Ёвсё╛ох╣ВсцCI_HookBeforeGenericKernelты╣Всц╦Э╪св╗сц╣д╧Ёвс
+//    ╤тсз"After"юЮ╧Ёвсё╛ох╣Всц╦Э╪св╗сц╣д╧Ёвс╨СвН╨С╣ВсцCI_HookBeforeGenericKernel
 typedef enum
 {
     hookresult_none,

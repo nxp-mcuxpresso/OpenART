@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- */
     { MP_OBJ_NEW_QSTR(MP_QSTR_AF0_LPI2C4),  MP_OBJ_NEW_SMALL_INT(GPIO_AF0_LPI2C4) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_AF0_PWM2),    MP_OBJ_NEW_SMALL_INT(GPIO_AF0_PWM2) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_AF1_GPT1),    MP_OBJ_NEW_SMALL_INT(GPIO_AF1_GPT1) },

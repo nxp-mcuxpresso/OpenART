@@ -14,6 +14,8 @@ bool DEMO_ReadTouch(lv_indev_drv_t *drv, lv_indev_data_t *data, uint32_t lvgl_w,
 	if (tp_dev == NULL)
 	{
 		tp_dev = rt_device_find("touch");
+		if (tp_dev == NULL)
+			return false;
 		
 		rt_device_control(tp_dev, RT_TOUCH_CTRL_SET_X_RANGE, &lvgl_w);
 		rt_device_control(tp_dev, RT_TOUCH_CTRL_SET_Y_RANGE, &lvgl_h);

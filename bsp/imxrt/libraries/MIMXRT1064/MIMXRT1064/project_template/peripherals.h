@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2017 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
 #ifndef _PERIPHERALS_H_
 #define _PERIPHERALS_H_
 

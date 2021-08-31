@@ -1,13 +1,3 @@
-/*
- * This file is part of the OpenMV project.
- *
- * Copyright (c) 2013-2019 Ibrahim Abdelkader <iabdalkader@openmv.io>
- * Copyright (c) 2013-2019 Kwabena W. Agyeman <kwagyeman@openmv.io>
- *
- * This work is licensed under the MIT license, see the file LICENSE for details.
- *
- * Contrast Limited Adaptive Histogram Equalization.
- */
 const float xyz_table[256] = {
      0.000000f,  0.030353f,  0.060705f,  0.091058f,  0.121411f,  0.151763f,  0.182116f,  0.212469f,
      0.242822f,  0.273174f,  0.303527f,  0.334654f,  0.367651f,  0.402472f,  0.439144f,  0.477695f,

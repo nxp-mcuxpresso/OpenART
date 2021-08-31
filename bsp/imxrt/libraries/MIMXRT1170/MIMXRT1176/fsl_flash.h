@@ -1,10 +1,3 @@
-/*
- * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
 #ifndef _FSL_FLASH_H_
 #define _FSL_FLASH_H_
 

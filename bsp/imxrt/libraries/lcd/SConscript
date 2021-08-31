@@ -17,6 +17,10 @@ if GetDepend('PANEL_RK043FN02H'):
 	src += Glob('RK043FN02H.c')
 	src += Glob('fsl_ft5406_rt.c')
 
+if GetDepend('PANEL_SEEKFREE18TFT'):
+	src += Glob('seekfree_lcd_18tft.c')
+
+
 LOCAL_CCFLAGS = ''    
 if rtconfig.CROSS_TOOL == 'gcc':
     LOCAL_CCFLAGS += ' -std=c99'

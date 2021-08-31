@@ -196,7 +196,7 @@ omv_restart:
     mp_obj_list_append(mp_sys_path, mp_obj_new_str(MICROPY_PY_PATH_SECOND, strlen(MICROPY_PY_PATH_SECOND)));
     
 	// delay to check sdcard
-	int time_delay = 20;
+	int time_delay = 50;
 	while(time_delay--) {rt_thread_delay(10);  if(mmcsd_is_present()) break;}
 	if(rt_device_find("sd0") != RT_NULL)
 	{

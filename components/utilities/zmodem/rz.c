@@ -1,15 +1,4 @@
 /*
- * Copyright (C) 2012, Real-Thread Information Technology Ltd
- * All rights reserved
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author       Notes
- * 2013-04-14     Grissiom     initial implementation
- * 2019-12-09     Steven Liu   add YMODEM send protocol
- */
-/*
  * File      : rz.c
  * the implemention of receiving files from the remote computers  
  * through the zmodem protocol.

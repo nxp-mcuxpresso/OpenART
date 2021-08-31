@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 def unittest(data_path, temp_path):
     import image
     thresholds = [(0, 100, 56, 95, 41, 74),  # generic_red_thresholds

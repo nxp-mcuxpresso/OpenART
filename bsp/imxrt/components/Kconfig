@@ -175,6 +175,9 @@ menu "NXP Software Components"
 
 		config MICROPYTHON_USING_LVGL
 			bool "LVGL -- GUI Library"
+			select BSP_USING_HWTIMER
+			select BSP_USING_HWTIMER1
+			select RT_USING_TOUCH
 			default n 
 	
 	    config PKG_MICROPYTHON_HEAP_SIZE

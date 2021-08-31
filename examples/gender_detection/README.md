@@ -38,9 +38,11 @@ Camera: MT9M114
 
 ### Software ###
 
-Model Files: "96_sex_cnn_quant.tflite", "main.py", "detection.bin", "btn_male.bin","btn_female.bin" and "btn_sexsel.bin". These files need store in SD Card
+Model Files: "96_sex_cnn_quant.tflite", "gender_detect.py","imagetools.py" and png pictures. These files need store in SD Card
 
 IDE: MDK V5.33
+
+OpenMV IDE: 2.6.7 or later
 
 #### Project Config ####
 
@@ -85,11 +87,17 @@ Open the project in MDK and compile it.
 
   2 Connect the debug COM with PC
   
-  3 Plugin the SD Card after copy the model file and main.py
+  3 Plugin the SD Card after copy the model file , png files , imagetools.py.
   
-  4 Reset the borad, board enter msh mode
+  ​	4 Rename  gender_detect.py to main.py, copy to SD Card.
   
-  5 Excute the scripyt by command: 'omv'
+  ​    5 Reset the board, omv thread will run into main.py
+  
+  ​    OR
+  
+  ​	4 Reset the borad, board run into omv thread and connect with OpenMV IDE through usb cable.
+  
+  ​	5 Execute the gender_detect.py in openMV IDE, disable Frame Buffer on the right top
   
   6 Show a picture or one person to the camera to test the model, result is shown in the left top label
 

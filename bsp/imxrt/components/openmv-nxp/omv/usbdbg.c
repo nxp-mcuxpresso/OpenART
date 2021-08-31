@@ -74,12 +74,12 @@ bool usbdbg_script_running()
 
 void usbdbg_set_irq_enabled(bool enabled)
 {
-	static int usb_dis_en = 0;
+	static int usb_dis_count = 0;
     if (enabled) {
-		usb_dis_en =0;
+		usb_dis_count ++;
 		NVIC_EnableIRQ(USB_OTG1_IRQn);
     } else {
-		usb_dis_en =1;
+		usb_dis_count --;
 		NVIC_DisableIRQ(USB_OTG1_IRQn);
     }
     

@@ -10,17 +10,173 @@
 #include "libtf.h"
 #include "libtf_person_detect_model_data.h"
 
+typedef struct HookOp_struct {
+	uint32_t opCode;
+	const char *pszName;
+}HookOp_t;
+#define CFG_TS_CNT	512
+#define CFG_OPC_CNT	48
+typedef struct tagOpProfile {
+	uint32_t usTime;
+	uint32_t x10000Rate;
+	uint16_t ndx;
+	uint16_t opCode;
+	char szOpName[32];
+}OpProfile_t;
+
+OpProfile_t g_opPfs[CFG_TS_CNT], g_opcPfs[CFG_OPC_CNT];
+volatile uint32_t g_tsNdx=0;
+volatile uint32_t g_usTotal=0;
+volatile uint32_t g_ts0=0;
+
+static volatile int g_tf_profiling_en = 0;
+
+static uint32_t rt_tick_get_us(){
+	uint32_t tick = rt_tick_get();
+	uint32_t us = (SysTick->LOAD - SysTick->VAL) / (SystemCoreClock/1000000);
+	us += tick * 1000;
+	return us;
+}
+
+uint32_t TFLm_HookBeforeInvoke(HookOp_t *pCtx) {
+    if (!g_tf_profiling_en) return 0;
+
+	g_ts0 = rt_tick_get_us();
+	if (g_tsNdx < CFG_TS_CNT) {
+		OpProfile_t *p = g_opPfs + g_tsNdx;
+		p->ndx = (uint16_t) g_tsNdx;
+		if (strlen(pCtx->pszName) < 32) {
+			strcpy(p->szOpName, pCtx->pszName);
+		} else {
+			memcpy(p->szOpName, pCtx->pszName, 31);
+			p->szOpName[31] = 0;
+		}
+		p->opCode = (uint16_t) pCtx->opCode;
+	}		
+	return 0;
+}
+
+uint32_t TFLm_HookAfterInvoke(HookOp_t *pCtx) {
+    if (!g_tf_profiling_en) return 0;
+	uint32_t dt = rt_tick_get_us() - g_ts0;
+	if (g_tsNdx < CFG_TS_CNT) {
+		OpProfile_t *p = g_opPfs + g_tsNdx;
+		p->usTime = dt;
+		g_tsNdx++;
+	}
+	g_usTotal += dt;	
+	return 0;
+}
+
+static void SortDescending(OpProfile_t *p, uint32_t cnt) {
+	int i, j;
+	OpProfile_t tmp;
+	for (i=0; i<cnt; i++) {
+		for (j=i+1; j<cnt; j++) {
+			if (p[i].usTime < p[j].usTime) {
+				tmp = p[i];
+				p[i] = p[j];
+				p[j] = tmp;
+			}
+		}
+	}
+}
+
+void ShowProfiling(void)
+{
+	OpProfile_t *p;
+	mp_printf(&mp_plat_print, "\r\n--------------------------------------------------");
+	mp_printf(&mp_plat_print, "\r\n-------------------Profiling----------------------");
+	mp_printf(&mp_plat_print, "\r\n--------------------------------------------------\r\n");
+	mp_printf(&mp_plat_print, "Total inference time: %d.%03dms\r\n", g_usTotal/1000, g_usTotal % 1000);
+	
+	for (int i=0; i<g_tsNdx; i++) {
+		g_opPfs[i].x10000Rate = (uint32_t)((uint64_t)g_opPfs[i].usTime * 10000 / g_usTotal);
+	}
+	
+	// SortDescending(g_opPfs, g_tsNdx);
+	uint32_t usAcc = 0, pcntAcc = 0;
+	mp_printf(&mp_plat_print, "odr, ndx, time ms,   unit%%, total%%\r\n");
+	for (int i=0; i<g_tsNdx; i++) {
+		// g_opPfs[i].x10000Rate = (uint32_t)((uint64_t)g_opPfs[i].usTime * 10000 / g_usTotal);
+		usAcc += g_opPfs[i].usTime;
+		pcntAcc = (uint64_t)usAcc * 10000 / g_usTotal;
+		mp_printf(&mp_plat_print, "%03d, %03d, %03d.%03dms, %02d.%02d%%, %02d.%02d%%, %s\r\n", 
+			i + 1, g_opPfs[i].ndx, 
+			g_opPfs[i].usTime / 1000, g_opPfs[i].usTime % 1000, 
+			g_opPfs[i].x10000Rate / 100, g_opPfs[i].x10000Rate % 100,
+			pcntAcc / 100, pcntAcc % 100, g_opPfs[i].szOpName);
+	}
+	// calculate by operator type 
+	mp_printf(&mp_plat_print, "\r\n--------------------------------------------------");
+	mp_printf(&mp_plat_print, "\r\n                  per operator                    ");
+	mp_printf(&mp_plat_print, "\r\n--------------------------------------------------\r\n");
+	mp_printf(&mp_plat_print, "Total inference time: %d.%03dms\r\n", g_usTotal/1000, g_usTotal % 1000);
+	{
+		int opCodeNdx, i, opCodeTypeCnt = 0;
+		const char *pszName;
+		uint32_t pcnt;
+		usAcc = 0;
+		pcntAcc = 0;
+		for (opCodeNdx=0; opCodeNdx < 256; opCodeNdx++) {
+			uint32_t opcUs = 0;
+			uint32_t opInstanceCnt = 0;
+			for (i=0; i<g_tsNdx; i++) {
+				if (g_opPfs[i].opCode != opCodeNdx) {
+					continue;
+				}
+				pszName = g_opPfs[i].szOpName;
+				opcUs += g_opPfs[i].usTime;
+				opInstanceCnt++;
+			}
+			if (0 == opcUs) 
+				continue;
+			if (opCodeTypeCnt >= CFG_OPC_CNT) {
+				continue;
+			}
+			g_opcPfs[opCodeTypeCnt].ndx = opInstanceCnt;
+			pcnt = (uint64_t)opcUs * 10000 / g_usTotal;
+			g_opcPfs[opCodeTypeCnt].x10000Rate = pcnt;
+			g_opcPfs[opCodeTypeCnt].usTime = opcUs;
+			g_opcPfs[opCodeTypeCnt].opCode = opCodeNdx;
+			if (strlen(pszName) < 32) {
+				strcpy(g_opcPfs[opCodeTypeCnt].szOpName, pszName);
+			} else {
+				memcpy(g_opcPfs[opCodeTypeCnt].szOpName, pszName, 31);
+				g_opcPfs[opCodeTypeCnt].szOpName[31] = 0;
+			}
+			opCodeTypeCnt++;
+		}
+		SortDescending(g_opcPfs, opCodeTypeCnt);
+		mp_printf(&mp_plat_print, "odr, opc, time ms,   unit%%, total%%,count,name\r\n");
+		for (int i=0; i < opCodeTypeCnt; i++) {
+			usAcc += g_opcPfs[i].usTime;
+			pcntAcc = (uint64_t)usAcc * 10000 / g_usTotal;
+			mp_printf(&mp_plat_print, "%02d, %03d, %03d.%03dms, %02d.%02d%%, %02d.%02d%%, %03d, %s\r\n",
+				i + 1, g_opcPfs[i].opCode, 
+				g_opcPfs[i].usTime/1000, g_opcPfs[i].usTime%1000, 
+				g_opcPfs[i].x10000Rate/100, g_opcPfs[i].x10000Rate%100,
+				pcntAcc / 100, pcntAcc % 100, g_opcPfs[i].ndx, g_opcPfs[i].szOpName);					
+		}
+	}
+	
+	g_tsNdx=0;
+	g_usTotal=0;
+	g_ts0=0;
+}
+
 #ifdef IMLIB_ENABLE_TF
 
 #define PY_TF_PUTCHAR_BUFFER_LEN 1023
 
-extern char *py_tf_putchar_buffer;
-extern size_t py_tf_putchar_buffer_len;
-
+char* py_tf_putchar_buffer = NULL;
+size_t py_tf_putchar_buffer_len = 0;
+int py_tf_putchar_buffer_index = 0;
 STATIC void alloc_putchar_buffer()
 {
     py_tf_putchar_buffer = (char *) fb_alloc0(PY_TF_PUTCHAR_BUFFER_LEN + 1, FB_ALLOC_NO_HINT);
     py_tf_putchar_buffer_len = PY_TF_PUTCHAR_BUFFER_LEN;
+	py_tf_putchar_buffer_index = 0;
 }
 
 // TF Model Object
@@ -133,20 +289,20 @@ static const mp_obj_type_t py_tf_model_type;
 
 extern char Image$$WEIT_CACHE_AREA$$Base[];
 #define weit_cache_area Image$$WEIT_CACHE_AREA$$Base
-#include "weight_cache_bundle.h"
+
+
+void* conv_helper_enter(uint32_t ndx, uint32_t maxSizeInBytes, uint32_t *pAllocedSizeInBytes) 
+{
+    pAllocedSizeInBytes[0] = WEIT_CACHE_SIZE;
+    return (void*) (weit_cache_area);
+}
+
 STATIC mp_obj_t int_py_tf_load(mp_obj_t path_obj, bool alloc_mode, bool weit_cache, bool helper_mode)
 {
     if (!helper_mode) {
         fb_alloc_mark();
     }
 
-	if(weit_cache){
-		init_weigth_cache(weit_cache_area, WEIT_CACHE_SIZE);
-	}else{
-		// Using the weight cache by assert ptr_head==NULL, so if not use weit_cache, 
-		// need to deinit, in case open then close, will mislead the code
-		deinit_weight_cache();
-	}
     const char *path = mp_obj_str_get_str(path_obj);
     py_tf_model_obj_t *tf_model = m_new_obj(py_tf_model_obj_t);
     tf_model->base.type = &py_tf_model_type;
@@ -489,6 +645,108 @@ STATIC mp_obj_t py_tf_classify(uint n_args, const mp_obj_t *args, mp_map_t *kw_a
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_classify_obj, 2, py_tf_classify);
 
+
+STATIC void py_tf_profile_output_data_callback(void *callback_data,
+                                                void *model_output,
+                                                const unsigned int output_height,
+                                                const unsigned int output_width,
+                                                const unsigned int output_channels,
+                                                const bool signed_or_unsigned,
+                                                const bool is_float)
+{
+ 
+}
+
+STATIC mp_obj_t py_tf_classify_profile(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+{
+	int tick;
+    fb_alloc_mark();
+    alloc_putchar_buffer();
+
+    py_tf_model_obj_t *arg_model = py_tf_load_alloc(args[0]);
+    image_t *arg_img = py_helper_arg_to_image_mutable(args[1]);
+
+    rectangle_t roi;
+    py_helper_keyword_rectangle_roi(arg_img, n_args, args, 2, kw_args, &roi);
+
+    float arg_min_scale = py_helper_keyword_float(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_min_scale), 1.0f);
+    PY_ASSERT_TRUE_MSG((0.0f < arg_min_scale) && (arg_min_scale <= 1.0f), "0 < min_scale <= 1");
+
+    float arg_scale_mul = py_helper_keyword_float(n_args, args, 4, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_scale_mul), 0.5f);
+    PY_ASSERT_TRUE_MSG((0.0f <= arg_scale_mul) && (arg_scale_mul < 1.0f), "0 <= scale_mul < 1");
+
+    float arg_x_overlap = py_helper_keyword_float(n_args, args, 5, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_x_overlap), 0.0f);
+    PY_ASSERT_TRUE_MSG(((0.0f <= arg_x_overlap) && (arg_x_overlap < 1.0f)) || (arg_x_overlap == -1.0f), "0 <= x_overlap < 1");
+
+    float arg_y_overlap = py_helper_keyword_float(n_args, args, 6, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_y_overlap), 0.0f);
+    PY_ASSERT_TRUE_MSG(((0.0f <= arg_y_overlap) && (arg_y_overlap < 1.0f)) || (arg_y_overlap == -1.0f), "0 <= y_overlap < 1");
+	
+	int offset = py_helper_keyword_int(n_args, args, 7, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_offset), 128);	
+	int fscale = py_helper_keyword_int(n_args, args, 8, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_scale), 128);
+
+    uint32_t tensor_arena_size;
+    uint8_t *tensor_arena = fb_alloc_all(&tensor_arena_size, FB_ALLOC_PREFER_SIZE);
+
+    mp_obj_t objects_list = mp_obj_new_list(0, NULL);
+
+    g_tf_profiling_en = 1;
+
+    for (float scale = 1.0f; scale >= arg_min_scale; scale *= arg_scale_mul) {
+        // Either provide a subtle offset to center multiple detection windows or center the only detection window.
+        for (int y = roi.y + ((arg_y_overlap != -1.0f) ? (fmodf(roi.h, (roi.h * scale)) / 2.0f) : ((roi.h - (roi.h * scale)) / 2.0f));
+            // Finish when the detection window is outside of the ROI.
+            (y + (roi.h * scale)) <= (roi.y + roi.h);
+            // Step by an overlap amount accounting for scale or just terminate after one iteration.
+            y += ((arg_y_overlap != -1.0f) ? (roi.h * scale * (1.0f - arg_y_overlap)) : roi.h)) {
+            // Either provide a subtle offset to center multiple detection windows or center the only detection window.
+            for (int x = roi.x + ((arg_x_overlap != -1.0f) ? (fmodf(roi.w, (roi.w * scale)) / 2.0f) : ((roi.w - (roi.w * scale)) / 2.0f));
+                // Finish when the detection window is outside of the ROI.
+                (x + (roi.w * scale)) <= (roi.x + roi.w);
+                // Step by an overlap amount accounting for scale or just terminate after one iteration.
+                x += ((arg_x_overlap != -1.0f) ? (roi.w * scale * (1.0f - arg_x_overlap)) : roi.w)) {
+
+                rectangle_t new_roi;
+                rectangle_init(&new_roi, x, y, roi.w * scale, roi.h * scale);
+
+                if (rectangle_overlap(&roi, &new_roi)) { // Check if new_roi is null...
+
+                    py_tf_input_data_callback_data_t py_tf_input_data_callback_data;
+                    py_tf_input_data_callback_data.img = arg_img;
+                    py_tf_input_data_callback_data.roi = &new_roi;
+					py_tf_input_data_callback_data.offset = offset;
+					py_tf_input_data_callback_data.scale = fscale;
+                    py_tf_classify_output_data_callback_data_t py_tf_classify_output_data_callback_data;
+                    PY_ASSERT_FALSE_MSG(libtf_invoke(arg_model->model_data,
+                                                     tensor_arena,
+                                                     tensor_arena_size,
+                                                     py_tf_input_data_callback,
+                                                     &py_tf_input_data_callback_data,
+                                                     py_tf_profile_output_data_callback,
+                                                     &py_tf_classify_output_data_callback_data),
+                                        py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));
+
+		
+                    py_tf_classification_obj_t *o = m_new_obj(py_tf_classification_obj_t);
+                    o->base.type = &py_tf_classification_type;
+                    o->x = mp_obj_new_int(new_roi.x);
+                    o->y = mp_obj_new_int(new_roi.y);
+                    o->w = mp_obj_new_int(new_roi.w);
+                    o->h = mp_obj_new_int(new_roi.h);
+                    o->output = py_tf_classify_output_data_callback_data.out;
+                    mp_obj_list_append(objects_list, o);
+                }
+            }
+        }
+    }
+    g_tf_profiling_en = 0;
+    ShowProfiling();
+    fb_alloc_free_till_mark();
+
+    return objects_list;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_classify_profile_obj, 2, py_tf_classify_profile);
+
 typedef struct py_tf_segment_output_data_callback_data {
     mp_obj_t out;
 } py_tf_segment_output_data_callback_data_t;
@@ -585,6 +843,7 @@ STATIC const mp_rom_map_elem_t locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_signed), MP_ROM_PTR(&py_tf_signed_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_float), MP_ROM_PTR(&py_tf_is_float_obj) },
     { MP_ROM_QSTR(MP_QSTR_classify), MP_ROM_PTR(&py_tf_classify_obj) },
+    { MP_ROM_QSTR(MP_QSTR_profile), MP_ROM_PTR(&py_tf_classify_profile_obj)},
     { MP_ROM_QSTR(MP_QSTR_segment), MP_ROM_PTR(&py_tf_segment_obj) }
 };
 
@@ -605,6 +864,7 @@ STATIC const mp_rom_map_elem_t globals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_load),            MP_ROM_PTR(&py_tf_load_obj) },
     { MP_ROM_QSTR(MP_QSTR_free_from_fb),    MP_ROM_PTR(&py_tf_free_from_fb_obj) },
     { MP_ROM_QSTR(MP_QSTR_classify),        MP_ROM_PTR(&py_tf_classify_obj) },
+    { MP_ROM_QSTR(MP_QSTR_profile),         MP_ROM_PTR(&py_tf_classify_profile_obj)},
     { MP_ROM_QSTR(MP_QSTR_segment),         MP_ROM_PTR(&py_tf_segment_obj) },
 #else
     { MP_ROM_QSTR(MP_QSTR_load),            MP_ROM_PTR(&py_func_unavailable_obj) },

@@ -595,7 +595,7 @@ const uint8_t cs_hidMouseReportDesc[] = {
 			HID_ReportSize(5),
 			HID_ReportCount(1),
 			HID_Input(HID_Constant | HID_Variable | HID_Absolute),
-			// X, Y ×ø±ê
+			// X, Y åæ ‡
 			HID_UsagePage(HID_USAGE_PAGE_GENERIC),
 			HID_Usage(HID_USAGE_GENERIC_X),
 			HID_Usage(HID_USAGE_GENERIC_Y),
@@ -614,7 +614,7 @@ const uint8_t cs_hidKeyboardReportDesc[] = {
 	HID_Usage(HID_USAGE_GENERIC_KEYBOARD),
 	HID_Collection(HID_Application),
 		HID_UsagePage(HID_USAGE_PAGE_KEYBOARD),
-		// ÌØÊâ¿ØÖÆ?? LfCtl -> RtGUI
+		// ç‰¹æ®Šæ§åˆ¶ï¿½? LfCtl -> RtGUI
 		HID_UsageMin(HID_USAGE_KEYBOARD_LCTRL),
 		HID_UsageMax(HID_USAGE_KEYBOARD_RGUI),
 		HID_LogicalMin(0),
@@ -622,22 +622,22 @@ const uint8_t cs_hidKeyboardReportDesc[] = {
 		HID_ReportSize(1),
 		HID_ReportCount(8),
 		HID_Input(HID_Data | HID_Variable | HID_Absolute),
-		// 1×Ö½ÚÌî³ä
+		// 1å­—èŠ‚å¡«å……
 		HID_ReportCount(1),			
 		HID_ReportSize(8),
 		HID_Input(HID_Constant | HID_Variable | HID_Absolute),
-		// 5ÕµLED
+		// 5ç›LED
 		HID_ReportCount(5),		
 		HID_ReportSize(1),		
 		HID_UsagePage(HID_USAGE_PAGE_LED),
 		HID_UsageMin(HID_USAGE_LED_NUM_LOCK),
 		HID_UsageMax(HID_USAGE_LED_KANA),
 		HID_Output(HID_Data | HID_Variable | HID_Absolute),
-		// 3bitÌî³ä
+		// 3bitå¡«å……
 		HID_ReportCount(1),
 		HID_ReportSize(3),
 		HID_Output(HID_Constant | HID_Variable | HID_Absolute),
-		// ÒÑ±»°´ÏÂµÄ¼üµÄÉ¨ÃèÂëÊı×é£¬Ö§??¸ö¼üÍ¬Ê±°´ÏÂ
+		// å·²è¢«æŒ‰ä¸‹çš„é”®çš„æ‰«æç æ•°ç»„ï¼Œæ”¯ï¿½?ä¸ªé”®åŒæ—¶æŒ‰ä¸‹
 		HID_ReportCount(6),
 		HID_ReportSize(8),
 		HID_LogicalMin(0),

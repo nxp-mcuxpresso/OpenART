@@ -1,0 +1,20 @@
+import rtconfig
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('main.c')
+
+if  GetDepend('NXP_ML_DEMO_TFLITE_KWS') or GetDepend('NXP_ML_DEMO_CMSISNN_KWS'):
+	src += Glob('kws.c')
+CPPPATH = [cwd]
+
+# add for startup script 
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS = ' -std=c99 __START=entry'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS = '-xc -std=gnu99 -mimplicit-float'
+    
+group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH,LOCAL_CCFLAGS=LOCAL_CCFLAGS)
+
+Return('group')

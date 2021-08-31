@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 import time, machine, pyb, os, gc
 import lvgl as lv
 import lvgl_helper
@@ -11,7 +6,7 @@ import lvgl_helper
 lv.init()
 #lvgl task hander called in timer
 def timer_callback(self):
-    lv.tick_inc(10)
+    lv.tick_inc(20)
     lv.task_handler()
     #pyb.mdelay(5)
 
@@ -523,7 +518,7 @@ def table_event_cb(obj,e):
     if(e == lv.EVENT.CLICKED):
         r,row,col = obj.get_pressed_cell()
         print("cell:",obj.get_cell_value(row,col))
-        
+
 
 table1 = lv.table(page)
 table1.add_style(table1.PART.CELL4, style_cell4)

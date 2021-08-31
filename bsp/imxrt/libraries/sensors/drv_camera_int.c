@@ -116,7 +116,7 @@ struct imxrt_camera
 	struct fb_mem_list fb_list;
 	sensor_t	sensor;
 	
-	uint8_t		sensor_id;
+	uint16_t	sensor_id;
 	uint8_t     sensor_addr;
 	GPIO_Type * sensor_pwn_io;
 	uint8_t     sensor_pwn_io_pin;
@@ -125,6 +125,11 @@ struct imxrt_camera
 	char 		*sensor_bus_name;
 	uint32_t	fb_buffer_start;
 	uint32_t	fb_buffer_end;
+};
+
+const uint8_t supported_sensors[2] = {
+	0x21,//ov7725
+	0x48//mt9m114
 };
 
 static struct imxrt_camera *pCam = NULL;
@@ -326,7 +331,7 @@ int imx_cam_sensor_write_reg(struct rt_i2c_bus_device *i2c_bus,rt_uint16_t addr,
 	}
 }
 
-int imx_cam_sensor_readb2_reg(struct rt_i2c_bus_device *i2c_bus,rt_uint16_t addr, rt_uint16_t reg, rt_uint8_t *data)
+int imx_cam_sensor_readb2_reg(struct rt_i2c_bus_device *i2c_bus,rt_uint8_t addr, rt_uint16_t reg, rt_uint8_t *data)
 {
 	struct rt_i2c_msg msgs[2];
 	rt_uint8_t buf[3];
@@ -380,6 +385,67 @@ int imx_cam_sensor_writeb2_reg(struct rt_i2c_bus_device *i2c_bus,rt_uint16_t add
 		cam_err("[%s] error\r\n",__func__);
 		return -1;
 	}
+}
+
+int imx_cam_sensor_cambus_writews(sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t *reg_data, uint8_t size)
+{
+	struct rt_i2c_msg msgs;
+	rt_uint8_t *buf;
+
+	struct rt_i2c_bus_device *i2c_bus = (struct rt_i2c_bus_device *)sensor->i2c_bus;
+	buf = (rt_uint8_t*)rt_malloc(size+2);
+	buf[0] = reg_addr & 0xff;
+	buf[1] = reg_addr >> 8; //cmd
+	
+	memcpy(buf+2 , reg_data,size);
+
+	msgs.addr = slv_addr;
+	msgs.flags = RT_I2C_WR;
+	msgs.buf = buf;
+	msgs.len = 2+size;
+
+	
+	if (rt_i2c_transfer(i2c_bus, &msgs, 1) == 1)
+	{
+		rt_free(buf);
+		return 0;
+	}
+	else
+	{
+		rt_free(buf);
+		cam_err("[%s] error\r\n",__func__);
+		return -1;
+	}
+}
+
+int imx_cam_sensor_cambus_readws(sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t *reg_data, uint8_t size)
+{
+	struct rt_i2c_msg msgs[2];
+	rt_uint8_t buf[4];
+	struct rt_i2c_bus_device *i2c_bus = (struct rt_i2c_bus_device *)sensor->i2c_bus;
+	
+	buf[0] = reg_addr & 0x00ff; //cmd
+	buf[1] = reg_addr >> 8; //cmd
+    msgs[0].addr = slv_addr;
+    msgs[0].flags = RT_I2C_WR;
+    msgs[0].buf = buf;
+    msgs[0].len = 2;
+	
+	msgs[1].addr = slv_addr;
+    msgs[1].flags = RT_I2C_RD;
+    msgs[1].buf = reg_data;
+    msgs[1].len = size;
+	
+    
+    if (rt_i2c_transfer(i2c_bus, msgs, 2) != 0)
+    {
+        return 0 ;
+    }
+    else
+    {
+		cam_err("[%s] error\r\n",__func__);
+        return -1;
+    }
 }
 
 int imx_cam_sensor_cambus_writeb(sensor_t *sensor, uint8_t slv_addr, uint8_t reg_addr, uint8_t reg_data)
@@ -464,116 +530,39 @@ int imx_cam_sensor_cambus_writew(sensor_t *sensor, uint8_t slv_addr, uint8_t reg
 	}
 }
 
-
-extern void BOARD_Camera_pwd_io_set(int value);
-extern void BORAD_Camera_rst_io_set(int value);
-void imx_cam_sensor_init(struct imxrt_camera *cam)
+int imx_cam_sensor_cambus_readw2(sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint16_t *reg_data)
 {
-	struct rt_i2c_bus_device *i2c_bus;
+	struct rt_i2c_msg msgs[2];
+	rt_uint8_t buf[4];
+	struct rt_i2c_bus_device *i2c_bus = (struct rt_i2c_bus_device *)sensor->i2c_bus;
 	
-
+	buf[0] = reg_addr & 0x00ff; //cmd
+	buf[1] = reg_addr >> 8; //cmd
+    msgs[0].addr = slv_addr;
+    msgs[0].flags = RT_I2C_WR;
+    msgs[0].buf = buf;
+    msgs[0].len = 2;
 	
-	i2c_bus = rt_i2c_bus_device_find(cam->sensor_bus_name);
-	if(i2c_bus == RT_NULL)
-	{
-		cam_err("[%s]driver can not find %s bus\r\n",__func__,cam->sensor_bus_name);
-		return ;
-	}
-	cam->sensor.i2c_bus = (uint32_t *)i2c_bus;
-	cam->sensor.cambus_readb = imx_cam_sensor_cambus_readb;
-	cam->sensor.cambus_writeb = imx_cam_sensor_cambus_writeb;
-	cam->sensor.cambus_readw = imx_cam_sensor_cambus_readw;
-	cam->sensor.cambus_writew = imx_cam_sensor_cambus_writew;
-	cam->sensor.cambus_readb2 = imx_cam_sensor_cambus_readb2;
-	cam->sensor.cambus_writeb2 = imx_cam_sensor_cambus_writeb2;
-	cam->sensor_addr = 0x21;
-	cam->sensor.slv_addr = cam->sensor_addr;
-
-#ifdef 	SOC_IMXRT1170_SERIES
-#else	
-	CLOCK_SetMux(kCLOCK_CsiMux, 0);
-    CLOCK_SetDiv(kCLOCK_CsiDiv, 0);
-#endif	
-
-	//reset camera
-	//power down to low
-	BOARD_Camera_pwd_io_set(0);
-	//reset 
-	BORAD_Camera_rst_io_set(0);
-	rt_thread_delay(10);
-	BORAD_Camera_rst_io_set(1);
-	rt_thread_delay(10);
-#if 0	
-	cam->sensor_addr = imx_cam_sensor_scan(i2c_bus);
-	if (cam->sensor_addr == 0)
-	{
-		cam->sensor.reset_pol = ACTIVE_HIGH;
-		BORAD_Camera_rst_io_set(0);
-		rt_thread_delay(10);
-		cam->sensor_addr = imx_cam_sensor_scan(i2c_bus);
-		if (cam->sensor_addr == 0)
-		{
-			cam->sensor.pwdn_pol = ACTIVE_HIGH;
-			BOARD_Camera_pwd_io_set(1);
-			rt_thread_delay(10);
-			cam->sensor_addr = imx_cam_sensor_scan(i2c_bus);
-			if (cam->sensor_addr == 0)
-			{
-				cam->sensor.reset_pol = ACTIVE_LOW;
-				BORAD_Camera_rst_io_set(1);
-				rt_thread_delay(10);
-				cam->sensor_addr = imx_cam_sensor_scan(i2c_bus);
-				if (cam->sensor_addr == 0)
-				{
-					cam_err("[%s] can not find any camera device\r\n",__func__);
-					return;
-				}
-			}
-		}
-	}
-#endif	
-	imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,ON_CHIP_ID, &cam->sensor_id);
-	if(cam->sensor_id == MT9V034_ID)
-	{
-	#ifdef SENSOR_MT9V034
-		mt9v034_init(&cam->sensor);
-	#endif	
-	}
-	else
-	{
-		imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,OV_CHIP_ID, &cam->sensor_id);
-		cam_echo("Camera Device id:0x%x\r\n",cam->sensor_id);
-		switch(cam->sensor_id)
-		{
-			case MT9V034_ID:
-				#ifdef SENSOR_MT9V034
-				mt9v034_init(&cam->sensor);
-				#endif
-				break;
-			case OV9650_ID:
-				#ifdef SENSOR_OV9650
-				ov9650_init(&cam->sensor);
-				#endif
-				break;
-			case OV2640_ID:
-				#ifdef SENSOR_OV2640
-				ov2640_init(&cam->sensor);
-				#endif
-				break;
-			case OV7725_ID:
-				#ifdef SENSOR_OV7725
-				ov7725_init(&cam->sensor);
-				#endif
-				break;
-			default:
-				cam_err("[%s] sensor id:0x%2x not support\r\n",__func__,cam->sensor_id);
-				break;
-		}
+	msgs[1].addr = slv_addr;
+    msgs[1].flags = RT_I2C_RD;
+    msgs[1].buf = (uint8_t *)(buf+2);
+    msgs[1].len = 2;
 	
-	}
+    
+    if (rt_i2c_transfer(i2c_bus, msgs, 2) != 0)
+    {
+		*reg_data = buf[3] | (buf[2] << 8);
+        return 0 ;
+    }
+    else
+    {
+		cam_err("[%s] error\r\n",__func__);
+        return -1;
+    }
 }
 
-int imxrt_camera_set_framerate(struct imxrt_camera *cam,framerate_t framerate)
+
+int imxrt_camera_set_framerate(struct imxrt_camera *cam,int framerate)
 {
     if (cam->sensor.framerate == framerate) {
        /* no change */
@@ -581,7 +570,7 @@ int imxrt_camera_set_framerate(struct imxrt_camera *cam,framerate_t framerate)
     }
 #ifdef 	SOC_IMXRT1170_SERIES
 #else		
-	if (framerate & 0x80000000)
+	if ((framerate & 0x80000000) && (cam->sensor_id == OV7725_ID))
 		CCM->CSCDR3 = framerate & (0x1F<<9);
 #endif
     /* call the sensor specific function */
@@ -597,6 +586,102 @@ int imxrt_camera_set_framerate(struct imxrt_camera *cam,framerate_t framerate)
     return 0;
 }
 
+extern void BOARD_Camera_pwd_io_set(int value);
+extern void BORAD_Camera_rst_io_set(int value);
+void imx_cam_sensor_init(struct imxrt_camera *cam)
+{
+	struct rt_i2c_bus_device *i2c_bus;
+	
+
+	
+	i2c_bus = rt_i2c_bus_device_find(cam->sensor_bus_name);
+	if(i2c_bus == RT_NULL)
+	{
+		cam_err("[%s]driver can not find %s bus\r\n",__func__,cam->sensor_bus_name);
+		return ;
+	}
+
+	for (int i=0; i< 2;i++)
+	{
+		cam->sensor.i2c_bus = (uint32_t *)i2c_bus;
+		cam->sensor.cambus_readb = imx_cam_sensor_cambus_readb;
+		cam->sensor.cambus_writeb = imx_cam_sensor_cambus_writeb;
+		cam->sensor.cambus_readw = imx_cam_sensor_cambus_readw;
+		cam->sensor.cambus_writew = imx_cam_sensor_cambus_writew;
+		cam->sensor.cambus_readb2 = imx_cam_sensor_cambus_readb2;
+		cam->sensor.cambus_writeb2 = imx_cam_sensor_cambus_writeb2;
+		cam->sensor.cambus_writews = imx_cam_sensor_cambus_writews;
+		cam->sensor.cambus_readws = imx_cam_sensor_cambus_readws;
+		cam->sensor_addr = supported_sensors[i];
+		cam->sensor.slv_addr = cam->sensor_addr;
+
+		CLOCK_SetMux(kCLOCK_CsiMux, 0);
+		CLOCK_SetDiv(kCLOCK_CsiDiv, 0);
+
+		//reset camera
+		//power down to low
+		BOARD_Camera_pwd_io_set(0);
+		//reset 
+		BORAD_Camera_rst_io_set(0);
+		rt_thread_delay(50);
+		BORAD_Camera_rst_io_set(1);
+		rt_thread_delay(50);
+
+		//read 2 bytes first for mt9m114
+		uint16_t sensor_id = 0;
+		imx_cam_sensor_cambus_readw2(&cam->sensor,cam->sensor_addr,0x0000, &sensor_id);
+		if(sensor_id == MT9M114_CHIP_ID)
+		{
+			cam_err("Camera Device id:0x%x\r\n",sensor_id);
+			mt9m114_init(&cam->sensor);
+			cam->sensor_id = MT9M114_CHIP_ID;
+			return;
+		}
+		else
+		{
+			uint8_t sensor_id = 0;
+			imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,OV_CHIP_ID, &sensor_id);
+			cam_err("Camera Device id:0x%x\r\n",sensor_id);
+			switch(sensor_id)
+			{
+				case MT9V034_ID:
+					#ifdef SENSOR_MT9V034
+					mt9v034_init(&cam->sensor);
+					#endif
+					cam->sensor_id = MT9V034_ID;
+					return;
+				case OV9650_ID:
+					#ifdef SENSOR_OV9650
+					ov9650_init(&cam->sensor);
+					#endif
+					cam->sensor_id = OV9650_ID;
+					return;
+				case OV2640_ID:
+					#ifdef SENSOR_OV2640
+					ov2640_init(&cam->sensor);
+					#endif
+					cam->sensor_id = OV2640_ID;
+					return;
+				case OV7725_ID:
+					#ifdef SENSOR_OV7725
+					ov7725_init(&cam->sensor);
+					cam->sensor_id = OV7725_ID;
+					imxrt_camera_set_framerate(cam,0x80000000 | (2<<9|(8-1)<<11));
+					#endif
+					
+					return;
+				default:
+					
+					break;
+			}
+		
+		}
+	}
+	cam_err("[%s] sensor id:0x%2x not support\r\n",__func__,cam->sensor_id);
+}
+
+
+
 void imx_cam_reset(struct imxrt_camera *cam)
 {
 	mutex_init(&JPEG_FB()->lock);
@@ -609,7 +694,7 @@ void imx_cam_reset(struct imxrt_camera *cam)
 	cam->sensor.wndH = cam->sensor.fb_h;
 	cam->sensor.wndW = cam->sensor.fb_w;
 	cam->sensor.wndX = cam->sensor.wndY = 0;	
-	imxrt_camera_set_framerate(cam,0x80000000 | (2<<9|(8-1)<<11));
+	
 	cam->sensor.sde          = 0xFF;
     cam->sensor.pixformat    = 0xFF;
     cam->sensor.framesize    = 0xFF;
@@ -1106,10 +1191,10 @@ void imx_cam_sensor_set_gainceiling(struct imxrt_camera *cam, gainceiling_t gain
 		cam->sensor.gainceiling = gainceiling;
 }
 
-void imx_cam_sensor_set_framesize(struct imxrt_camera *cam, framesize_t framesize)
+int imx_cam_sensor_set_framesize(struct imxrt_camera *cam, framesize_t framesize)
 {
 	if(cam->sensor.set_framesize == NULL || cam->sensor.set_framesize(&cam->sensor,framesize) != 0)
-		return;
+		return -1;
 	
 	cam->sensor.framesize = framesize;
 	
@@ -1117,6 +1202,8 @@ void imx_cam_sensor_set_framesize(struct imxrt_camera *cam, framesize_t framesiz
 	cam->fb_list.h = cam->sensor.fb_h = resolution[framesize][1];
 	
 	cam->sensor.wndX = 0; cam->sensor.wndY = 0 ; cam->sensor.wndW = cam->sensor.fb_w ; cam->sensor.wndH = cam->sensor.fb_h;
+
+	return 0;
 }
 
 void imx_cam_sensor_set_pixformat(struct imxrt_camera *cam, pixformat_t pixformat)
@@ -1127,24 +1214,6 @@ void imx_cam_sensor_set_pixformat(struct imxrt_camera *cam, pixformat_t pixforma
 		return;
 	
 	cam->sensor.pixformat = pixformat;
-}
-
-rt_err_t imx_cam_sensor_set_framerate(struct imxrt_camera *cam, int rate)
-{
-	if (cam->sensor.framerate == rate)
-		return RT_ERROR;
-	if (rate & 0x80000000)
-		CCM->CSCDR3 = rate & (0x1F<<9);
-	/* call the sensor specific function */
-    if (cam->sensor.set_framerate == NULL
-        || cam->sensor.set_framerate(&cam->sensor, rate) != 0) {
-        /* operation not supported */
-        return RT_ERROR;
-    }
-
-    /* set the frame rate */
-    cam->sensor.framerate = rate;
-	return RT_EOK;
 }
 
 void imx_cam_csi_stop(struct rt_camera_device *cam)
@@ -1172,7 +1241,7 @@ static rt_err_t imx_cam_camera_control(struct rt_camera_device *cam, rt_uint32_t
 			cam->status = RT_CAMERA_DEVICE_INIT;
 			break;
 		case RT_DRV_CAM_CMD_SET_FRAMERATE:
-			return imx_cam_sensor_set_framerate(imx_cam, parameter);
+			return imxrt_camera_set_framerate(imx_cam, parameter);
 		    break;
 		case RT_DRV_CAM_CMD_SET_CONTRAST:
 			imx_cam_sensor_set_contrast(imx_cam, parameter);
@@ -1181,8 +1250,7 @@ static rt_err_t imx_cam_camera_control(struct rt_camera_device *cam, rt_uint32_t
 			imx_cam_sensor_set_gainceiling(imx_cam, parameter);
 			break;
 		case RT_DRV_CAM_CMD_SET_FRAMESIZE:
-			imx_cam_sensor_set_framesize(imx_cam, parameter);
-			break;
+			return imx_cam_sensor_set_framesize(imx_cam, parameter);
 		case RT_DRV_CAM_CMD_SET_PIXFORMAT:
 			imx_cam_sensor_set_pixformat(imx_cam, parameter);
 			break;
@@ -1432,6 +1500,7 @@ int imxrt_camera_set_windowing(struct rt_camera_device *sensor, int x,int y, int
 		
 		imx_cam->fb_list.w = w;
 		imx_cam->fb_list.h = h;
+		csi_calc_first = 0;
 	}
 	return 0;
 }

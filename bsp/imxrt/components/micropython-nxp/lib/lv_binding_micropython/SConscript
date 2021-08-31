@@ -11,6 +11,7 @@ src     += Glob('lvgl/src/*/*.c')
 src   += ['driver/nxp/input.c']
 src	  += ['driver/nxp/lv_helper_nxp.c']
 
+src += Glob('driver/png/gen/*.c')
 
 path   = [cwd + '/']
 path  += [cwd + '/lvgl']
@@ -26,7 +27,7 @@ path  += [cwd + '/lvgl/src/lv_widgets']
 
 path  += [cwd + '/driver/nxp']
 
-
+path  += [cwd + '/driver/png/lodepng']
 
 LOCAL_CCFLAGS = ''
 

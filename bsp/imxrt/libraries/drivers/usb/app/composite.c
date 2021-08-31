@@ -441,30 +441,46 @@ int32_t USBAPP_Deinit(void)
 	return -1;
 }
 
-
+#define USE_EVT 1
 rt_thread_t usb_tid;
 rt_sem_t usb_sem = RT_NULL;
 
+struct rt_event usb_isr_event;
+#define EVENT_USB_ISR 1
 void usb_thread_entry(void *parameter)
 {
+	#if !USE_EVT
 	usb_sem = rt_sem_create("usb", 0, RT_IPC_FLAG_FIFO);
+	#endif
 	USB_DeviceIsrEnable();
 	while(1)
 	{
 		//disable usb int
+		#if USE_EVT
+		if (rt_event_recv(&usb_isr_event, EVENT_USB_ISR,RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
+                      RT_WAITING_FOREVER, NULL) == RT_EOK)
+		#else
 		rt_sem_take(usb_sem, RT_WAITING_FOREVER);
-		NVIC_DisableIRQ(USB_OTG1_IRQn);
-		__DSB(); __ISB();
-		USBAPP_IRQHandler();
-		NVIC_EnableIRQ(USB_OTG1_IRQn);
+		#endif
+		{
+			NVIC_DisableIRQ(USB_OTG1_IRQn);
+			__DSB(); __ISB();
+			USBAPP_IRQHandler();
+			//NVIC_ClearPendingIRQ(USB_OTG1_IRQn);
+			NVIC_EnableIRQ(USB_OTG1_IRQn);
+        }
 		__DSB(); __ISB();
 	}
 }
 
 void USBAPP_ResumeThread()
 {
+	#if USE_EVT
+	rt_event_send(&usb_isr_event, EVENT_USB_ISR);
+	#else
 	rt_sem_release(usb_sem);
-	rt_schedule();
+	#endif
+
 	NVIC_DisableIRQ(USB_OTG1_IRQn);
 	__DSB(); __ISB();
 }
@@ -474,8 +490,11 @@ void USBAPP_StartThread()
 	rt_err_t result;
 	
 	NVIC_DisableIRQ(USB_OTG1_IRQn);
+	#if USE_EVT
+	rt_event_init(&usb_isr_event, "event", RT_IPC_FLAG_FIFO);
+	#endif
     usb_tid = rt_thread_create("usb", usb_thread_entry, RT_NULL,
-                            RT_MAIN_THREAD_STACK_SIZE, 2, 20);
+                            RT_MAIN_THREAD_STACK_SIZE, 4, 20);
     RT_ASSERT(usb_tid != RT_NULL);
 	rt_thread_startup(usb_tid);
 	rt_thread_suspend(usb_tid);
@@ -483,7 +502,12 @@ void USBAPP_StartThread()
 
 void USBAPP_DestroyThread()
 {
+	#if USE_EVT
+	rt_event_control(&usb_isr_event,RT_IPC_CMD_RESET,0);
+	rt_event_detach(&usb_isr_event);
+	#else
 	rt_sem_delete(usb_sem);
+	#endif
 	rt_thread_delete(usb_tid);
 }
 

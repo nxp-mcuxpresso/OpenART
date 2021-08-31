@@ -1,0 +1,151 @@
+#!armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m7 -xc
+/*
+** ###################################################################
+**     Processors:          MIMXRT1062CVJ5A
+**                          MIMXRT1062CVL5A
+**                          MIMXRT1062DVJ6A
+**                          MIMXRT1062DVL6A
+**
+**     Compiler:            Keil ARM C/C++ Compiler
+**     Reference manual:    IMXRT1060RM Rev. B, 07/2018
+**     Version:             rev. 0.1, 2017-01-10
+**     Build:               b180819
+**
+**     Abstract:
+**         Linker file for the Keil ARM C/C++ Compiler
+**
+**     Copyright 2016 Freescale Semiconductor, Inc.
+**     Copyright 2016-2018 NXP
+**
+**     SPDX-License-Identifier: BSD-3-Clause
+**
+**     http:                 www.nxp.com
+**     mail:                 support@nxp.com
+**
+** ###################################################################
+*/
+
+#define m_flash_config_start           0x70000000
+#define m_flash_config_size            0x00001000
+
+#define m_ivt_start                    0x70001000
+#define m_ivt_size                     0x00001000
+
+#define m_interrupts_start             0x70002000
+#define m_interrupts_size              0x00000400
+
+#define m_text_start                   0x70002400
+#define m_text_size                    0x002FDC00
+
+#define m_data_start                   0x20000000
+#define m_data_size                    0x00020000
+
+#define m_data2_start                  0x20200000
+#define m_data2_size                   0x00080000
+
+#define RW_SRAM_END_addr			   0x81E00000
+
+#define STACK_SIZE 0x2000
+#define HEAP_SIZE  0x400
+#define OMV_FB_TOTAL_SIZE (10*1024*1024)
+#define OMV_MAIN_FB_SIZE	(4*720*1280)
+#define OMV_FB_ALLOC_SIZE  (OMV_FB_TOTAL_SIZE - OMV_MAIN_FB_SIZE)
+#define OMV_FB_ALLOC_OVERLAY_SIZE	120*1024 //fast 
+#include "../../rtconfig.h"
+LR_m_text m_flash_config_start m_text_start+m_text_size-m_flash_config_start {   ; load region size_region
+	RW_m_config_text m_flash_config_start FIXED m_flash_config_size { ; load address = execution address
+	* (.boot_hdr.conf, +FIRST)
+	}
+
+	RW_m_ivt_text m_ivt_start FIXED m_ivt_size { ; load address = execution address
+	* (.boot_hdr.ivt, +FIRST)
+	* (.boot_hdr.boot_data)
+	* (.boot_hdr.dcd_data)
+	}
+
+	VECTOR_ROM m_interrupts_start FIXED m_interrupts_size { ; load address = execution address
+	* (RESET,+FIRST)
+	* (InRoot$$Section)
+	}
+
+	ER_m_text m_text_start FIXED m_text_size { ; load address = execution address
+	.ANY (+RO)
+	}
+
+	VECTOR_RAM 0 EMPTY 1*1024 { ; RAM vector region (in RAMX)
+	}
+
+	#define ITCM_SIZE	32*1024	
+	ER_ITCM +0 ITCM_SIZE - STACK_SIZE -HEAP_SIZE { ; Stack region growing down
+		gc.o rt_mem*.o (+RO)
+		collections.o array.o xalloc.o (+RO)
+		arm_nn_mat*.o (+RO)
+		* (.ram_code)
+		
+	}
+	
+	OVERLAY_FLASH +0 16*1024{
+		fsl_flexspi.o (+RO +RW +ZI)
+		fsl_flash.o (+RO +RW +ZI)
+		drv_norflash.o (+RO +RW +ZI)
+		fsl_clock.o (+RO +RW +ZI)
+	}
+	
+	
+	DTCM_START_PLACEHOLDER 0x20000000 EMPTY 0 {}
+#if defined(NXP_USING_OPENMV)	
+	WEIT_CACHE_AREA +0 EMPTY WEIT_CACHE_SIZE {}
+#endif	
+	ARM_LIB_STACK +0 EMPTY STACK_SIZE {}
+	ARM_LIB_HEAP +0 EMPTY HEAP_SIZE ; Heap region growing up
+	{}	
+	RW_m_data +0 { ; RW data
+	*(.dmaFramebuffer)
+	.ANY (+RW +ZI)
+	* (NonCacheable)
+	}
+	
+#if defined(MICROPYTHON_USING_LVGL)	
+	ER_LVGL_ZI_DATA +0 NOCOMPRESS{
+		lv_*.o (+RW, +ZI)
+	}
+#endif	
+	
+	OMV_FB_ALLOC_OVERLAY +0 EMPTY OMV_FB_ALLOC_OVERLAY_SIZE {}
+	OMV_FB_ALLOC_OVERLAY_END +0 EMPTY 0 {}	
+	DTCM_END_PLACEHOLDER 0x20078000 EMPTY 0 {}
+
+	RW_SRAM 0x80000000  EMPTY 0 {}
+
+	#define RTT_HEAP_SIZE 128*1024
+	RTT_HEAP +0 EMPTY RTT_HEAP_SIZE{} 
+	#if defined(NXP_USING_MICROPYTHON) 	
+	
+	RTT_MPY_THREAD_STACK +0 EMPTY NXP_MICROPYTHON_THREAD_STACK_SIZE{}
+	#endif	
+	#if defined(NXP_USING_MICROPYTHON) 	
+	MPY_HEAP_START +0 EMPTY PKG_MICROPYTHON_HEAP_SIZE{}
+	#endif	
+	#if defined(NXP_USING_OPENMV)	
+	MPY_SENSOR_BUFER_START	+0 EMPTY 6*1024*1024{}
+	; <<<
+	ER_LCD_FB +0 UNINIT 1024*1024  {
+		* (.lcd_fb)
+	}
+
+	OMV_MAIN_FB +0 EMPTY OMV_MAIN_FB_SIZE  + OMV_FB_ALLOC_SIZE {}
+	//	OMV_FB_ALLOC +0 EMPTY OMV_FB_ALLOC_SIZE {}
+	OMV_FB_END +0 EMPTY 16 {}
+	; >>> SDRAM >>>
+	#endif
+	
+	RW_SRAM_END 0x81E00000  EMPTY 0 {}
+
+	RW_SRAM_NCACHE 0x81E00000 EMPTY 0 {}
+	USB_BUFFER +0{
+		* (.usb_buf)
+		*(*m_usb_dma_init_data)
+		*(*m_usb_dma_noninit_data)
+		}
+	RW_SRAM_NCACHE_END 0x82000000 EMPTY 0 {}
+}

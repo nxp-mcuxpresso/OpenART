@@ -1,32 +1,35 @@
 /*
- * Copyright (c) 2015 - 2016, Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * This file is part of the Micro Python project, http://micropython.org/
  */
+
+/**
+  ******************************************************************************
+  * @file    usbd_storage_msd.c
+  * @author  MCD application Team
+  * @version V1.1.0
+  * @date    19-March-2012
+  * @brief   This file provides the disk operations functions.
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  *
+  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  * You may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at:
+  *
+  *        http://www.st.com/software_license_agreement_liberty_v2
+  *
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  *
+  * Heavily modified by dpgeorge for Micro Python.
+  *
+  ******************************************************************************
+  */
 
 #include <stdint.h>
 #include "fsl_device_registers.h"
@@ -157,24 +160,49 @@ uint32_t sdcard_get_lba_count(void)
         return 0;
     }
 	
+	rt_device_close(mss_device);
+	
 	return geometry.sector_count;
 }
 
 uint32_t sdcard_read_blocks(uint8_t *dest, uint32_t block_num, uint32_t num_blocks)
 {
+    mss_device = rt_device_find(STORAGE_DEVICE_NAME);
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_read(mss_device,block_num,dest,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_read(mss_device,block_num,dest,num_blocks);
+
+    rt_device_close(mss_device);
+    return count;
 }
 
 uint32_t sdcard_write_blocks(const uint8_t *src, uint32_t block_num, uint32_t num_blocks)
 {
+    mss_device = rt_device_find(STORAGE_DEVICE_NAME);
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_write(mss_device,block_num,src,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_write(mss_device,block_num,src,num_blocks);
+
+    rt_device_close(mss_device);
+    return count;
 }
+
 #ifdef BSP_USING_SPIFLASH_PARTITION
 uint32_t flash_start_sector = 0;
 uint32_t flash_get_lba_count(void)
@@ -206,23 +234,46 @@ uint32_t flash_get_lba_count(void)
         return 0;
     }
 	
+    rt_device_close(mss_device);
 	return geometry.sector_count;
 }
 
 uint32_t flash_read_blocks(uint8_t *dest, uint32_t block_num, uint32_t num_blocks)
 {
+    mss_device = rt_device_find("flash0");
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_read(mss_device,block_num,dest,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("flash disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_read(mss_device,block_num,dest,num_blocks);
+    rt_device_close(mss_device);
+    
+    return count;
 }
 
 uint32_t flash_write_blocks(const uint8_t *src, uint32_t block_num, uint32_t num_blocks)
 {
+	mss_device = rt_device_find("flash0");
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_write(mss_device,block_num,src,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("flash disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_write(mss_device,block_num,src,num_blocks);
+    rt_device_close(mss_device);
+
+    return count;
 }
 
 #endif

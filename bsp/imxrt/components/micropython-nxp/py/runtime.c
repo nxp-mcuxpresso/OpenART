@@ -36,6 +36,7 @@
 #include "py/objlist.h"
 #include "py/objmodule.h"
 #include "py/objgenerator.h"
+#include "py/objtype.h"
 #include "py/smallint.h"
 #include "py/runtime.h"
 #include "py/builtin.h"

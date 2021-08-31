@@ -5,7 +5,7 @@ cwd = GetCurrentDir()
 src = []
 path =  [cwd,cwd + '/config']
 CPPDEFINES = []
-LOCAL_CCFLAGS = ''
+
 if GetDepend('BSP_USING_GPIO'):
     src += ['drv_gpio.c']
 
@@ -63,21 +63,6 @@ if GetDepend('RT_USING_USB_DEVICE'):
     src += Glob('usb/phy/*.c')
     CPPDEFINES += ['ENDIANNESS']
 
-if (GetDepend('NXP_USING_USB_STACK')):
-	CPPDEFINES += ['ENDIANNESS']
-	
-	src += Glob('usb/phy/*.c')
-	src += Glob('usb/app/*.c')
-	src += Glob('usb/device/*.c')
-	path  += [cwd + '/usb/app']		
-	path  += [cwd + '/usb/include']	
-	path  += [cwd + '/usb/phy']
-	path  += [cwd + '/usb/device']	
-
-if GetDepend('NXP_USING_OPENMV'):
-	src += Glob('usb/omv/*.c')
-	path  += [cwd + '/usb/omv']	
-	
 if GetDepend('BSP_USING_FLASH'):
 	src += ['drv_norflash.c']	
 
@@ -86,6 +71,8 @@ if GetDepend('BSP_USING_74HC595'):
 
 path  += [cwd + '/wlan/esp8266']
 
-group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES=CPPDEFINES)
-
-Return('group')
+groups =[]
+groups += DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES=CPPDEFINES)
+ 
+groups += SConscript('usb/SConscript')
+Return('groups')

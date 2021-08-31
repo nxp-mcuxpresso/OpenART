@@ -1,9 +1,3 @@
-// <MCU>_prefix.c becomes the initial portion of the generated pins file.
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 #ifndef RT_CONFIG_H__
 #define RT_CONFIG_H__
 
@@ -194,7 +188,7 @@
 #define MICROPYTHON_USING_UOS
 #define MICROPYTHON_USING_FILE_SYNC_VIA_IDE
 #define MICROPYTHON_USING_THREAD
-#define PKG_MICROPYTHON_HEAP_SIZE 524288
+#define PKG_MICROPYTHON_HEAP_SIZE 2097152
 
 /* multimedia packages */
 
@@ -204,6 +198,8 @@
 
 /* system packages */
 
+/* acceleration: Assembly language or algorithmic acceleration packages */
+
 
 /* Micrium: Micrium software products porting for RT-Thread */
 
@@ -211,13 +207,15 @@
 /* peripheral libraries and drivers */
 
 
-/* miscellaneous packages */
+/* AI packages */
 
+
+/* miscellaneous packages */
 
 /* samples: kernel and components samples */
 
 
-/* games: games run on RT-Thread console */
+/* entertainment: terminal games and other interesting software packages */
 
 #define SOC_IMXRT1064_SERIES
 
@@ -302,13 +300,5 @@
 #define NXP_USING_OMV_TFLITE
 #define NXP_USING_GLOW
 #define NXP_OMV_AUTO_START
-
-/* NXP eIQ support */
-
-
-/* AIA Machine Learning Demos */
-
-/* Glow examples */
-
 
 #endif
