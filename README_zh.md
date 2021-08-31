@@ -1,4 +1,4 @@
-# OpenArT #
+# OpenArT
 
 [![GitHub release](https://img.shields.io/github/release/RT-Thread/rt-thread.svg)](https://github.com/RT-Thread/rt-thread/releases)
 [![Build Status](https://travis-ci.org/RT-Thread/rt-thread.svg)](https://travis-ci.org/RT-Thread/rt-thread)
@@ -6,9 +6,11 @@
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/RT-Thread/rt-thread.svg)](https://github.com/RT-Thread/rt-thread/pulls)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](https://github.com/RT-Thread/rt-thread/pulls)
 
-OpenART是一个基于NXP MCU的开源AI开发工具包，支持最流行的引擎:TFlite-Micro, CMSIS-NN, Glow和OpenMV&Micropython。
+OpenART是一个基于NXP MCU的开源AI开发验证平台，支持最流行的引擎:TFlite-Micro, CMSIS-NN, Glow。
 
-## 简介 ##
+为AI开发者提供了一套快速简洁的模型验证方法：基于Micropython环境使用python API运行模型。并支持机器视觉库OpenMV，图形库LVGL。可以同时使用python开发AI应用界面程序。
+
+## 简介
 
 OpenART支持当前最流行RTOS:RT-Thread以及它的构建工具
 RT-Thread包含了一个自有的、传统的硬实时内核：可抢占的多任务实时调度器，信号量，互斥量，邮箱，消息队列，信号等。当然，它和传统的实时操作系统还存在着三种不同：
@@ -32,13 +34,12 @@ RT-Thread包含了一个自有的、传统的硬实时内核：可抢占的多�
 
 更多的IoT软件包则以package方式被添加到RT-Thread系统中。
 
-应用模块，或者说用户应用（User Application，UA）是一个可动态加载的模块：它可以独立于RT-Thread固件而单独编译。一般的，每个UA都包含一个main函数入口；一个它自己的对象链表，用于管理这个应用的任务/信号量/消息队列等内核对象，创建、初始化、销毁等。更多关于UA的信息，请访问另外一个 [git 仓库](https://github.com/RT-Thread/rtthread-apps) 了解。
+![Framework](documentation/framework.png)
 
-![Framework](documentation/framework.jpg)
+## General Purpose
 
-## General Purpose ##
+### AI Education
 
-### AI Education ###
 支持最流行的引擎:TFlite-Micro, CMSIS-NN, Glow以及常用模型： 
 *Mobilenet V1
 *Mobilenet V2
@@ -46,24 +47,21 @@ RT-Thread包含了一个自有的、传统的硬实时内核：可抢占的多�
 *Cifar 10
 *Lenet
 
-
-### Machine Vision ###
+### Machine Vision
 
 OpenMV项目旨在通过开发一个用户友好的、开源的、低成本的机器视觉平台，使机器视觉更易于为初学者使用。
 Version 3.6
 
-### MCU Education ###
+### MCU Education
 
 通过python脚本学习使用通用MCU外设控制等。
 version: Micropython 1.12
 
-## 支持的硬件 ##
+## 支持的硬件
 
 * ```MIMXRT1060-EVK```
 * ```MIMXRT1170-EVK```
 * ```SeekFree Openart-mini```
-
-
 
 ## 演示示例
 
@@ -75,9 +73,7 @@ version: Micropython 1.12
 
 - 性别识别 示例，在目录： examples\gender_detection
 
-  
-
-## 许可证 ##
+## 许可证
 
 RT-Thread从v3.1.1版本开始，是一个以Apache许可证2.0版本授权的开源软件，许可证信息以及版权信息一般的可以在代码首部看到：
 
@@ -93,7 +89,7 @@ RT-Thread从v3.1.1版本开始，是一个以Apache许可证2.0版本授权的�
 
 以Apache许可协议v2.0版本授权仅在RT-Thread v3.1.1正式版发布之后才正式实施，当前依然在准备阶段（准备所有原有开发者签署CLA协议）。
 
-## 编译 ##
+## 编译
 
 RT-Thread使用了[scons](http://www.scons.org)做为自身的编译构建系统，并进行一定的定制以满足自身的需求（可以通过scons --help查看RT-Thread中额外添加的命令）。在编译RT-Thread前，请先安装Python 2.7.x及scons。
 
@@ -120,6 +116,17 @@ RT-Thread使用了[scons](http://www.scons.org)做为自身的编译构建系统
 
 注意：RT-Thread的scons构建系统会根据配置头文件rtconfig.h来裁剪系统。例如，如果你关闭了rtconfig.h中的lwIP定义（通过注释掉```#define RT_USING_LWIP```的方式），则scons生成的IDE工程文件中将自动不包括lwIP相关的文件。而在RT-Thread 3.0版本中，可以通过menuconfig的方式来配置整个系统，而不需要再手工更改rtconfig.h配置头文件。
 
-## 贡献者 ##
+### 示例代码:
 
-请访问github上RT-Thread项目上的contributors了解已经为RT-Thread提交过代码，PR的贡献者。感谢所有为RT-Thread付出的开发者们！
+```
+import sensor,image,tf
+
+sensor.reset()
+sensor.set_pixformat(sensor.RGB565)
+sensor.set_framesize(sensor.QVGA)
+net = "xxx.tflite"
+while(1):
+    img = sensor.snapshot()
+    objs = tf.classify(net,image) #classify the type of image
+    objs = tf.detect(net,image) #find object in image
+```

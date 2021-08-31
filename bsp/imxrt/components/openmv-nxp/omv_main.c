@@ -269,6 +269,7 @@ omv_restart:
 			g_isMainDotPyRunning = 0;	
 			fb_free_all();      
 			fb_alloc_init0();
+			post_processing(true);
 		}
 		
 		mp_printf(&mp_plat_print, "Exit from main.py!\r\n");
@@ -310,7 +311,7 @@ RunREPL:
 			pyexec_str((vstr_t *)usbdbg_get_script());
 
             nlr_pop();
-			
+			usbdbg_set_script_running(false);
 			post_processing(false);
         } else {
             mp_obj_print_exception(&mp_plat_print, (mp_obj_t)nlr.ret_val);

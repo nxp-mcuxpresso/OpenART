@@ -127,9 +127,10 @@ struct imxrt_camera
 	uint32_t	fb_buffer_end;
 };
 
-const uint8_t supported_sensors[2] = {
-	0x21,//ov7725
-	0x48//mt9m114
+const uint16_t supported_sensors[3][2] = {
+	{0x21,OV_CHIP_ID},//ov7725
+	{0x48,0x00},//mt9m114
+	{OV5640_SLV_ADDR>>1,OV5640_CHIP_ID}
 };
 
 static struct imxrt_camera *pCam = NULL;
@@ -601,7 +602,7 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 		return ;
 	}
 
-	for (int i=0; i< 2;i++)
+	for (int i=0; i< 3;i++)
 	{
 		cam->sensor.i2c_bus = (uint32_t *)i2c_bus;
 		cam->sensor.cambus_readb = imx_cam_sensor_cambus_readb;
@@ -612,7 +613,7 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 		cam->sensor.cambus_writeb2 = imx_cam_sensor_cambus_writeb2;
 		cam->sensor.cambus_writews = imx_cam_sensor_cambus_writews;
 		cam->sensor.cambus_readws = imx_cam_sensor_cambus_readws;
-		cam->sensor_addr = supported_sensors[i];
+		cam->sensor_addr = supported_sensors[i][0];
 		cam->sensor.slv_addr = cam->sensor_addr;
 
 		CLOCK_SetMux(kCLOCK_CsiMux, 0);
@@ -628,41 +629,57 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 		rt_thread_delay(50);
 
 		//read 2 bytes first for mt9m114
-		uint16_t sensor_id = 0;
-		imx_cam_sensor_cambus_readw2(&cam->sensor,cam->sensor_addr,0x0000, &sensor_id);
-		if(sensor_id == MT9M114_CHIP_ID)
-		{
-			cam_err("Camera Device id:0x%x\r\n",sensor_id);
-			mt9m114_init(&cam->sensor);
-			cam->sensor_id = MT9M114_CHIP_ID;
-			return;
+		uint16_t sensor_id_s = 0;
+		uint8_t sensor_id = 0;
+		if(imx_cam_sensor_cambus_readw2(&cam->sensor,cam->sensor_addr,supported_sensors[i][1], &sensor_id_s) == 0)
+		{//two bytes addr, two bytes value
+			if(sensor_id_s == MT9M114_CHIP_ID)
+			{
+				cam_err("Camera Device id:0x%x\r\n",sensor_id_s);
+				mt9m114_init(&cam->sensor);
+				cam->sensor_id = MT9M114_CHIP_ID;
+				return;
+			}
 		}
-		else
-		{
-			uint8_t sensor_id = 0;
-			imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,OV_CHIP_ID, &sensor_id);
-			cam_err("Camera Device id:0x%x\r\n",sensor_id);
+		
+		if (imx_cam_sensor_readb2_reg(i2c_bus,cam->sensor_addr,supported_sensors[i][1], &sensor_id) == 0)
+		{//two byte addr, one bytes value
+			if(sensor_id == OV5640_ID)
+			{
+				cam_err("Camera Device id:0x%x\r\n",sensor_id);
+				ov5640_init(&cam->sensor);
+				cam->sensor_id = OV5640_ID;
+				return;
+			}
+		}
+		
+		if (imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,OV_CHIP_ID, &sensor_id) == 0)
+		{//one byte addr. one byte value
 			switch(sensor_id)
 			{
 				case MT9V034_ID:
+					cam_err("Camera Device id:0x%x\r\n",sensor_id);
 					#ifdef SENSOR_MT9V034
 					mt9v034_init(&cam->sensor);
 					#endif
 					cam->sensor_id = MT9V034_ID;
 					return;
 				case OV9650_ID:
+					cam_err("Camera Device id:0x%x\r\n",sensor_id);
 					#ifdef SENSOR_OV9650
 					ov9650_init(&cam->sensor);
 					#endif
 					cam->sensor_id = OV9650_ID;
 					return;
 				case OV2640_ID:
+					cam_err("Camera Device id:0x%x\r\n",sensor_id);
 					#ifdef SENSOR_OV2640
 					ov2640_init(&cam->sensor);
 					#endif
 					cam->sensor_id = OV2640_ID;
 					return;
 				case OV7725_ID:
+					cam_err("Camera Device id:0x%x\r\n",sensor_id);
 					#ifdef SENSOR_OV7725
 					ov7725_init(&cam->sensor);
 					cam->sensor_id = OV7725_ID;
