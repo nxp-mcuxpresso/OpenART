@@ -1,0 +1,10 @@
+#
+# Copyright (c) 2006-2018, RT-Thread Development Team
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+def unittest(data_path, temp_path):
+    import image
+    img = image.Image("/sd/unittest/data/qrcode.pgm", copy_to_fb=True)
+    codes = img.find_qrcodes()
+    return len(codes) == 1 and codes[0][0:] == (76, 36, 168, 168, 'https://openmv.io', 1, 1, 3, 4, 0)

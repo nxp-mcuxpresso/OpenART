@@ -1,0 +1,16 @@
+# for module compiling
+import os
+from building import *
+from auto_generate_qstr import gen_qstr
+
+cwd = GetCurrentDir()
+objs = []
+list = os.listdir(cwd)
+
+path = os.path.normpath(os.getcwd() + '/../../../..')
+print('Generate Qstring in :',path)
+print('QString Hash Size :',GetDepend('MICROPY_QSTR_BYTES_IN_HASH'))
+gen_qstr(path,GetDepend('MICROPY_QSTR_BYTES_IN_HASH'));
+
+Return('objs')
+

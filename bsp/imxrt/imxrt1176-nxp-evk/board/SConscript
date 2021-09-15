@@ -1,0 +1,33 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+import os
+
+# add the general drivers.
+src = Split("""
+board.c
+MCUX_Config/clock_config.c
+MCUX_Config/pin_mux.c
+""")
+
+if GetDepend(['NXP_USING_MICROPYTHON']):
+	print("Generate PINs files...")
+	cmd = 'python .\make-pins.py -b .\pins.csv > pins_imxrtevk117x.c'
+	print(cmd)
+	os.popen(cmd)
+	src += ['pins_imxrtevk117x.c']
+cwd = GetCurrentDir()
+
+CPPPATH = [cwd,cwd + '/MCUX_Config',cwd + '/ports']
+
+CPPDEFINES = ['SKIP_SEMC_INIT','CPU_MIMXRT1176DVMAA_cm7', 'STD=C99', 'SKIP_SYSCLK_INIT', 'EVK_MCIMXRM', 'FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL','XIP_EXTERNAL_FLASH=1', 'XIP_BOOT_HEADER_ENABLE=1,XIP_BOOT_HEADER_DCD_ENABLE=1,ARM_MATH_CM7,__FPU_PRESENT,FFCONF_H=\"oofatfs/ffconf.h\",HARD_FP,FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1']
+
+LOCAL_CCFLAGS = ''    
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS += ' -std=c99'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS += ' --c99 --gnu'
+    
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH, CPPDEFINES=CPPDEFINES)
+
+Return('group')

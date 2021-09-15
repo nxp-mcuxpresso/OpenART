@@ -1,0 +1,104 @@
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+path = [cwd + '/CMSIS/Include',cwd + '/MIMXRT1176', cwd + '/MIMXRT1176/drivers',cwd + '/MIMXRT1176/drivers/cm7']
+src = Split('''
+MIMXRT1176/system_MIMXRT1176_cm7.c
+MIMXRT1176/drivers/fsl_common.c
+MIMXRT1176/drivers/fsl_clock.c
+MIMXRT1176/drivers/fsl_pmu.c 
+MIMXRT1176/drivers/fsl_anatop.c 
+MIMXRT1176/drivers/fsl_anatop_ai.c
+MIMXRT1176/drivers/cm7/fsl_cache.c
+
+''')
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    src += ['MIMXRT1176/gcc/startup_MIMXRT1176_cm7.S']
+elif rtconfig.CROSS_TOOL == 'keil':
+    src += ['MIMXRT1176/arm/startup_MIMXRT1176_cm7.S']
+elif rtconfig.CROSS_TOOL == 'iar':
+    src += ['MIMXRT1176/iar/startup_MIMXRT1176_cm7.S']
+
+if GetDepend(['BSP_USING_GPIO']):
+    src += ['MIMXRT1176/drivers/fsl_gpio.c']
+
+if GetDepend(['BSP_USING_LPUART']):
+    src += ['MIMXRT1176/drivers/fsl_lpuart.c']
+
+if GetDepend(['BSP_USING_I2C']):
+    src += ['MIMXRT1176/drivers/fsl_lpi2c.c']
+
+if GetDepend(['BSP_USING_SPI']):
+    src += ['MIMXRT1176/drivers/fsl_lpspi.c']
+
+if GetDepend(['BSP_USING_HWTIMER']) or GetDepend(['BSP_USING_PWM']):
+    src += ['MIMXRT1176/drivers/fsl_gpt.c']
+
+if GetDepend(['BSP_USING_PWM']):
+    src += ['MIMXRT1176/drivers/fsl_pwm.c']
+
+if GetDepend(['BSP_USING_RTC']):
+    src += ['MIMXRT1176/drivers/fsl_snvs_hp.c']
+    src += ['MIMXRT1176/drivers/fsl_snvs_lp.c']
+
+if GetDepend(['BSP_USING_WDT']):
+    src += ['MIMXRT1176/drivers/fsl_wdog.c']
+    src += ['MIMXRT1176/drivers/fsl_rtwdog.c']
+
+if GetDepend(['BSP_USING_ADC']):
+    src += ['MIMXRT1176/drivers/fsl_adc.c']
+
+if GetDepend(['BSP_USING_SDRAM']):
+    src += ['MIMXRT1176/drivers/fsl_semc.c']
+
+if GetDepend(['BSP_USING_LCD']):
+    src += ['MIMXRT1052/drivers/fsl_elcdif.c']
+
+if GetDepend(['BSP_USING_SDIO']):
+    src += ['MIMXRT1176/drivers/fsl_usdhc.c']
+
+if GetDepend(['RT_USING_CAN']):
+    src += ['MIMXRT1176/drivers/fsl_flexcan.c']
+
+if GetDepend(['RT_USING_CSI']):
+    src += ['MIMXRT1176/drivers/fsl_csi.c']
+
+if GetDepend('RT_USING_MIPI_CSI'):
+	src += ['MIMXRT1176/drivers/fsl_soc_mipi_csi2rx.c']
+	src += Glob('MIMXRT1176/drivers/fsl_mipi_c*.c')
+	
+if GetDepend('RT_USING_LCD'):
+	src += ['MIMXRT1176/drivers/fsl_elcdif.c']
+	src += ['MIMXRT1176/drivers/fsl_pxp.c']
+	src += ['MIMXRT1176/drivers/fsl_soc_src.c']
+
+if GetDepend('RT_USING_MIPI_DSI'):
+	src += ['MIMXRT1176/drivers/fsl_mipi_dsi.c']
+	
+if GetDepend(['BSP_USING_ETH']):
+    src += ['MIMXRT1176/drivers/fsl_enet.c']
+
+if GetDepend(['RT_USING_AUDIO']):
+    src += ['MIMXRT1176/drivers/fsl_sai.c']
+	
+if GetDepend(['BSP_USING_SERVO']) or GetDepend(['MICROPY_HW_ENABLE_SERVO']):
+    src += ['MIMXRT1176/drivers/fsl_qtmr.c']
+	
+if GetDepend(['BSP_USING_LTDC']):
+    src += ['MIMXRT1176/drivers/']
+
+if GetDepend(['BSP_USING_DMA']):
+    src += ['MIMXRT1176/drivers/fsl_dmamux.c']
+    src += ['MIMXRT1176/drivers/fsl_edma.c']
+    src += ['MIMXRT1176/drivers/fsl_lpuart_edma.c']
+    src += ['MIMXRT1176/drivers/fsl_lpspi_edma.c']
+    
+if GetDepend('BSP_USING_FLASH'):
+	src += ['MIMXRT1176/fsl_flash.c']
+	src += ['MIMXRT1176/drivers/fsl_flexspi.c']
+	
+group = DefineGroup('Libraries', src, depend = [''], CPPPATH = path)
+
+Return('group')

@@ -1,0 +1,17 @@
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\bin\armproc.dll" 
+
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\bin\armJET.dll" 
+
+"C:\LocalData\Project\MCU\RT\RTThread\origin_git\rt-thread\bsp\imxrt\imxrt1062-nxp-evk\build\iar\Exe\project.out" 
+
+--plugin="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\bin\armbat.dll" 
+
+--device_macro="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\config\debugger\NXP\iMXRT.dmac" 
+
+--device_macro="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\config\debugger\NXP\iMXRT_Trace.dmac" 
+
+--flash_loader="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\config\flashloader\NXP\FlashIMXRT1064_SIP.board" 
+
+
+
+

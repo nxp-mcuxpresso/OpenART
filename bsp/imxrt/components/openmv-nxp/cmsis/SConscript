@@ -1,0 +1,32 @@
+from building import *
+import rtconfig
+
+# get current directory
+cwd     = GetCurrentDir()
+# The set of source files associated with this SConscript file.
+src    = Glob('src/dsp/FastMathFunctions/*.c')
+src   += Glob('src/dsp/MatrixFunctions/*.c')
+src   += Glob('src/dsp/CommonTables/arm_common_tables.c')
+
+if not GetDepend(['NXP_USING_NNCU']):
+	src   += Glob('src/nn/ActivationFunctions/*.c')
+	src   += Glob('src/nn/ConvolutionFunctions/*.c')
+	src   += Glob('src/nn/FullyConnectedFunctions/*.c')
+	src   += Glob('src/nn/NNSupportFunctions/*.c')
+	src   += Glob('src/nn/PoolingFunctions/*.c')
+	src   += Glob('src/nn/SoftmaxFunctions/*.c')
+else:
+	src   += ['src/nn/PoolingFunctions/arm_pool_q7_HWC_nonsquare.c']
+
+
+path   = [cwd + 'include']
+LOCAL_CCFLAGS = ''
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS += ' -std=c99'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS += ' --c99 --gnu'
+
+group = DefineGroup('cmsis', src, depend = ['NXP_USING_OPENMV'], CPPPATH = path)
+
+Return('group')

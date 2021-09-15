@@ -1,0 +1,89 @@
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+path = [cwd + '/CMSIS/Include',cwd + '/MIMXRT1062', cwd + '/MIMXRT1062/drivers']
+src = Split('''
+MIMXRT1062/system_MIMXRT1062.c
+MIMXRT1062/drivers/fsl_common.c
+MIMXRT1062/drivers/fsl_clock.c
+MIMXRT1062/drivers/fsl_cache.c
+''')
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    src += ['MIMXRT1062/gcc/startup_MIMXRT1062.S']
+elif rtconfig.CROSS_TOOL == 'keil':
+    src += ['MIMXRT1062/arm/startup_MIMXRT1062.s']
+elif rtconfig.CROSS_TOOL == 'iar':
+    src += ['MIMXRT1062/iar/startup_MIMXRT1062.s']
+
+if GetDepend(['BSP_USING_GPIO']):
+    src += ['MIMXRT1062/drivers/fsl_gpio.c']
+
+if GetDepend(['BSP_USING_LPUART']):
+    src += ['MIMXRT1062/drivers/fsl_lpuart.c']
+
+if GetDepend(['BSP_USING_I2C']):
+    src += ['MIMXRT1062/drivers/fsl_lpi2c.c']
+
+if GetDepend(['BSP_USING_SPI']):
+    src += ['MIMXRT1062/drivers/fsl_lpspi.c']
+
+if GetDepend(['BSP_USING_HWTIMER']) or GetDepend(['BSP_USING_PWM']):
+    src += ['MIMXRT1062/drivers/fsl_gpt.c']
+
+if GetDepend(['BSP_USING_PWM']):
+    src += ['MIMXRT1062/drivers/fsl_pwm.c']
+
+if GetDepend(['BSP_USING_RTC']):
+    src += ['MIMXRT1062/drivers/fsl_snvs_hp.c']
+    src += ['MIMXRT1062/drivers/fsl_snvs_lp.c']
+
+if GetDepend(['BSP_USING_WDT']):
+    src += ['MIMXRT1062/drivers/fsl_wdog.c']
+    src += ['MIMXRT1062/drivers/fsl_rtwdog.c']
+
+if GetDepend(['BSP_USING_ADC']):
+    src += ['MIMXRT1062/drivers/fsl_adc.c']
+
+if GetDepend(['BSP_USING_SDRAM']):
+    src += ['MIMXRT1062/drivers/fsl_semc.c']
+
+if GetDepend(['BSP_USING_LCD']):
+    src += ['MIMXRT1052/drivers/fsl_elcdif.c']
+
+if GetDepend(['BSP_USING_SDIO']):
+    src += ['MIMXRT1062/drivers/fsl_usdhc.c']
+
+if GetDepend(['RT_USING_CAN']):
+    src += ['MIMXRT1062/drivers/fsl_flexcan.c']
+
+if GetDepend(['RT_USING_CSI']):
+    src += ['MIMXRT1062/drivers/fsl_csi.c']
+	
+if GetDepend(['BSP_USING_ETH']):
+    src += ['MIMXRT1062/drivers/fsl_enet.c']
+
+if GetDepend(['RT_USING_AUDIO']):
+    src += ['MIMXRT1062/drivers/fsl_sai.c']
+	
+if GetDepend(['BSP_USING_SERVO']) or GetDepend(['MICROPY_HW_ENABLE_SERVO']):
+    src += ['MIMXRT1062/drivers/fsl_qtmr.c']
+	
+if GetDepend(['BSP_USING_LTDC']):
+    src += ['MIMXRT1062/drivers/']
+
+if GetDepend(['BSP_USING_DMA']):
+    src += ['MIMXRT1062/drivers/fsl_dmamux.c']
+    src += ['MIMXRT1062/drivers/fsl_edma.c']
+    src += ['MIMXRT1062/drivers/fsl_lpuart_edma.c']
+    src += ['MIMXRT1062/drivers/fsl_lpspi_edma.c']
+    
+if GetDepend('BSP_USING_FLASH'):
+	src += ['MIMXRT1062/fsl_flash.c']
+	src += ['MIMXRT1062/drivers/fsl_flexspi.c']
+src += 	['MIMXRT1062/drivers/fsl_trng.c']
+src += 	['MIMXRT1062/drivers/fsl_elcdif.c']
+group = DefineGroup('Libraries', src, depend = [''], CPPPATH = path)
+
+Return('group')

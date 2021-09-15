@@ -1,0 +1,18 @@
+import rtconfig
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('main.c')
+
+CPPPATH = [cwd]
+
+# add for startup script 
+LOCAL_CCFLAGS=''
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS = ' -std=c99 __START=entry'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS = ' --c99 --gnu'
+    
+group = DefineGroup('Applications', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

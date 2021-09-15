@@ -1,0 +1,40 @@
+from building import *
+import rtconfig
+
+# get current directory
+cwd     = GetCurrentDir()
+# The set of source files associated with this SConscript file.
+src     = ['gen/lv_mpy.c']
+src     += Glob('lvgl/src/*/*.c')
+# add the input driver and add a helper module
+
+src   += ['driver/nxp/input.c']
+src	  += ['driver/nxp/lv_helper_nxp.c']
+
+
+path   = [cwd + '/']
+path  += [cwd + '/lvgl']
+path  += [cwd + '/lvgl/src']
+path  += [cwd + '/lvgl/src/lv_core']
+path  += [cwd + '/lvgl/src/lv_draw']
+path  += [cwd + '/lvgl/src/lv_font']
+path  += [cwd + '/lvgl/src/lv_gpu']
+path  += [cwd + '/lvgl/src/lv_hal']
+path  += [cwd + '/lvgl/src/lv_misc']
+path  += [cwd + '/lvgl/src/lv_thems']
+path  += [cwd + '/lvgl/src/lv_widgets']
+
+path  += [cwd + '/driver/nxp']
+
+
+
+LOCAL_CCFLAGS = ''
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS += ' -std=c99'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS += ' --c99 --gnu'
+
+group = DefineGroup('LVGL', src, depend = ['MICROPYTHON_USING_LVGL'], CPPPATH = path)
+
+Return('group')

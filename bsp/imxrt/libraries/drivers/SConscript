@@ -1,0 +1,91 @@
+from building import *
+
+cwd = GetCurrentDir()
+
+src = []
+path =  [cwd,cwd + '/config']
+CPPDEFINES = []
+LOCAL_CCFLAGS = ''
+if GetDepend('BSP_USING_GPIO'):
+    src += ['drv_gpio.c']
+
+if  GetDepend('BSP_USING_LPUART'):
+    src += ['drv_uart.c']
+
+if  GetDepend('BSP_USING_HWTIMER'):
+    src += ['drv_hwtimer.c']
+
+if GetDepend('BSP_USING_RTC'):
+    src += ['drv_rtc.c']
+
+if  GetDepend('BSP_USING_SPI'):
+    src += ['drv_spi.c']
+
+if  GetDepend('BSP_USING_I2C'):
+    src += ['drv_i2c.c']
+
+if GetDepend('BSP_USING_WDT'):
+    src += ['drv_wdt.c']
+
+if GetDepend('BSP_USING_PWM'):
+    src += ['drv_pwm.c']
+
+if GetDepend('BSP_USING_ADC'):
+    src += ['drv_adc.c']
+
+if GetDepend('BSP_USING_CAN'):
+    src += ['drv_can.c']
+    
+if GetDepend('BSP_USING_SDRAM'):
+    src += ['drv_sdram.c']
+
+if GetDepend('BSP_USING_LCD'):
+    src += ['drv_lcd.c']
+
+if GetDepend('BSP_USING_ETH'):
+    src += ['drv_eth.c']
+
+if GetDepend('BSP_USING_AUDIO'):
+    src += ['drv_sai.c']
+    src += ['bsp_wm8960.c']
+  
+if GetDepend('BSP_USING_SDIO'):
+    src += ['drv_sdio.c'] 
+
+# add usb device driver code
+if GetDepend('RT_USING_USB_DEVICE'):
+	src += ['drv_usbd.c']
+	src += Glob('usb/device/*.c')
+	path  += [cwd + '/usb/include']
+	
+# add usb phy driver code
+if GetDepend('RT_USING_USB_DEVICE'):
+    src += Glob('usb/phy/*.c')
+    CPPDEFINES += ['ENDIANNESS']
+
+if (GetDepend('NXP_USING_USB_STACK')):
+	CPPDEFINES += ['ENDIANNESS']
+	
+	src += Glob('usb/phy/*.c')
+	src += Glob('usb/app/*.c')
+	src += Glob('usb/device/*.c')
+	path  += [cwd + '/usb/app']		
+	path  += [cwd + '/usb/include']	
+	path  += [cwd + '/usb/phy']
+	path  += [cwd + '/usb/device']	
+
+if GetDepend('NXP_USING_OPENMV'):
+	src += Glob('usb/omv/*.c')
+	path  += [cwd + '/usb/omv']	
+	
+if GetDepend('BSP_USING_FLASH'):
+	src += ['drv_norflash.c']	
+
+if GetDepend('BSP_USING_74HC595'):
+	src += ['drv_74hc595.c']	
+
+path  += [cwd + '/wlan/esp8266']
+
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES=CPPDEFINES)
+
+Return('group')

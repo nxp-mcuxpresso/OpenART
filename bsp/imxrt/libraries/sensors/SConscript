@@ -1,0 +1,45 @@
+from building import *
+import rtconfig
+
+cwd = GetCurrentDir()
+
+src = []
+LIBS    = []
+LIBPATH = []
+if GetDepend('SENSOR_MT9V034'):
+    src = Glob('mt9v034.c')
+	
+if GetDepend('SENSOR_OV2640'):
+    src += Glob('ov2640.c')
+	
+if GetDepend('SENSOR_OV5640'):
+    src += Glob('ov5640.c')	
+	
+if GetDepend('SENSOR_OV7725'):
+    src += Glob('ov7725.c')
+
+if GetDepend('SENSOR_OV9650'):
+    src += Glob('ov9650.c')
+
+if GetDepend('SENSOR_SCC8660'):
+    LIBPATH = [cwd]
+    LIBS = ['SCC8660']
+	
+if GetDepend('BSP_SENSOR_UART'):
+	src += Glob('drv_camera_uart.c')
+elif GetDepend('SOC_IMXRT1060_SERIES') or  GetDepend('SOC_IMXRT1064_SERIES') or GetDepend('SOC_IMXRT1050_SERIES'):
+	src += Glob('drv_camera_int.c')
+else:
+	src += Glob('drv_camera.c')
+
+LOCAL_CCFLAGS = ''    
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS += ' -std=c99'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS += ' -xc -std=gnu99 -mimplicit-float'	
+
+path  = [cwd ]
+
+group = DefineGroup('Sensors', src, depend = ['RT_USING_CSI'], CPPPATH = path,LIBPATH = LIBPATH ,LIBS = LIBS,LOCAL_CCFLAGS=LOCAL_CCFLAGS)
+
+Return('group')

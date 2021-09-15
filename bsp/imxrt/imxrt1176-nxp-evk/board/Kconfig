@@ -1,0 +1,437 @@
+menu "Hardware Drivers"
+
+
+config BSP_USING_HYPERFLASH
+    bool
+    default n
+
+config BSP_USING_4MFLASH
+    bool
+    default n
+
+config SOC_MIMXRT1176DVMMA
+    bool
+    select SOC_IMXRT1170_SERIES
+    select BSP_USING_4MFLASH
+    select RT_USING_COMPONENTS_INIT
+    select RT_USING_USER_MAIN
+    default y
+
+menu "On-chip Peripheral Drivers"
+
+    config BSP_USING_GPIO
+        bool "Enable GPIO"
+        select RT_USING_PIN
+        default y
+
+    menuconfig BSP_USING_LPUART
+        bool "Enable UART"
+        select RT_USING_SERIAL
+        default y
+        if BSP_USING_LPUART
+            config BSP_USING_LPUART1
+                bool "Enable LPUART1"
+                default y
+
+                config BSP_LPUART1_RX_USING_DMA
+                    bool "Enable LPUART1 RX DMA"
+                    depends on BSP_USING_LPUART1
+                    select BSP_USING_DMA
+                    select RT_SERIAL_USING_DMA
+                    default n
+
+                    config BSP_LPUART1_RX_DMA_CHANNEL
+                        depends on BSP_LPUART1_RX_USING_DMA
+                        int "Set LPUART1 RX DMA channel (0-32)"
+                        default 0
+
+                config BSP_LPUART1_TX_USING_DMA
+                    bool "Enable LPUART1 TX DMA"
+                    depends on BSP_USING_LPUART1
+                    select BSP_USING_DMA
+                    select RT_SERIAL_USING_DMA
+                    default n
+
+                    config BSP_LPUART1_TX_DMA_CHANNEL
+                        depends on BSP_LPUART1_TX_USING_DMA
+                        int "Set LPUART1 TX DMA channel (0-32)"
+                        default 1
+
+            config BSP_USING_LPUART3
+                bool "Enable LPUART3"
+                default n
+
+                config BSP_LPUART3_RX_USING_DMA
+                    bool "Enable LPUART3 RX DMA"
+                    depends on BSP_USING_LPUART3
+                    select BSP_USING_DMA
+                    select RT_SERIAL_USING_DMA
+                    default n
+
+                    config BSP_LPUART3_RX_DMA_CHANNEL
+                        depends on BSP_LPUART3_RX_USING_DMA
+                        int "Set LPUART3 RX DMA channel (0-32)"
+                        default 0
+
+                config BSP_LPUART3_TX_USING_DMA
+                    bool "Enable LPUART3 TX DMA"
+                    depends on BSP_USING_LPUART3
+                    select BSP_USING_DMA
+                    select RT_SERIAL_USING_DMA
+                    default n
+
+                    config BSP_LPUART3_TX_DMA_CHANNEL
+                        depends on BSP_LPUART3_TX_USING_DMA
+                        int "Set LPUART3 TX DMA channel (0-32)"
+                        default 1
+        endif
+		menuconfig BSP_USING_HWTIMER
+        bool "Enable GPT"
+        default n
+        select RT_USING_HWTIMER
+        if BSP_USING_HWTIMER
+            config BSP_USING_HWTIMER1
+                bool "Enable GPT1"
+                default n
+
+            config BSP_USING_HWTIMER2
+                bool "Enable GPT2"
+                default n
+        endif
+
+    menuconfig BSP_USING_PWM
+        bool "Enable PWM"
+        default n
+        select RT_USING_PWM
+        if BSP_USING_PWM
+            menuconfig BSP_USING_PWM1
+                bool "Enable output pwm1"
+                default n
+                if BSP_USING_PWM1
+                    config BSP_USING_PWM1_CH3
+                        bool "Enable PWM1 channel3"
+                        default n
+                endif
+
+            menuconfig BSP_USING_PWM4
+                bool "Enable output pwm4"
+                default n
+                if BSP_USING_PWM4
+                    config BSP_USING_PWM4_CH0
+                        bool "Enable PWM4 channel0"
+                        default n
+
+                    config BSP_USING_PWM4_CH1
+                        bool "Enable PWM4 channel1"
+                        default n
+                endif
+        endif
+    menuconfig BSP_USING_SPI
+        bool "Enable SPI"
+        default n
+        select RT_USING_SPI
+        if BSP_USING_SPI
+            menuconfig BSP_USING_SPI1
+                bool "Enable SPI1"
+                default n
+                if BSP_USING_SPI1
+                    config BSP_SPI_USING_DMA
+                         bool "Enable SPI1 DMA"
+                         default n
+				endif		 
+        endif
+
+    menuconfig BSP_USING_I2C
+        bool "Enable I2C"
+        select RT_USING_I2C
+        default n
+        if BSP_USING_I2C
+            config BSP_USING_I2C1
+                bool "Enable I2C1"
+                default n
+            choice
+                prompt "Select I2C1 badurate"
+                default HW_I2C1_BADURATE_100kHZ
+
+                config HW_I2C1_BADURATE_100kHZ
+                    bool "Badurate 100kHZ"
+
+                config HW_I2C1_BADURATE_400kHZ
+                    bool "Badurate 400kHZ"
+            endchoice
+            config BSP_USING_I2C5
+                bool "Enable I2C5"
+                default n
+            choice
+                prompt "Select I2C5 badurate"
+                default HW_I2C5_BADURATE_100kHZ
+
+                config HW_I2C5_BADURATE_100kHZ
+                    bool "Badurate 100kHZ"
+
+                config HW_I2C5_BADURATE_400kHZ
+                    bool "Badurate 400kHZ"
+            endchoice
+			config BSP_USING_I2C6
+                bool "Enable I2C6"
+                default n
+            choice
+                prompt "Select I2C6 badurate"
+                default HW_I2C6_BADURATE_100kHZ
+
+                config HW_I2C6_BADURATE_100kHZ
+                    bool "Badurate 100kHZ"
+
+                config HW_I2C6_BADURATE_400kHZ
+                    bool "Badurate 400kHZ"
+            endchoice
+        endif
+
+    config BSP_USING_RTC
+        bool "Enable RTC"
+        select RT_USING_RTC
+        default n
+
+	
+
+	
+    menuconfig BSP_USING_ADC
+        bool "Enable ADC"
+        default n
+        select RT_USING_ADC
+        if BSP_USING_ADC
+            config BSP_USING_ADC1
+                bool "Enable ADC1"
+                default n
+        endif
+
+    config BSP_USING_FLASH
+        bool "Enable norFLASH"
+        default y 	
+		
+	menuconfig BSP_USING_WDT
+        bool "Enable Watchdog Timer"
+        select RT_USING_WDT
+        default n	
+		if BSP_USING_WDT
+            config BSP_USING_WDT1
+                bool "Enable WDT1"
+                default n
+			config BSP_USING_WDT3
+                bool "Enable WDT3"
+                default n
+        endif
+	menuconfig BSP_USING_CAN
+        bool "Enable CAN"
+        select RT_USING_CAN
+        default n	
+		if BSP_USING_CAN
+            config BSP_USING_CAN1"
+                bool "Enable CAN1"			
+                default n
+			config BSP_USING_CAN2
+                bool "Enable CAN2"
+                default n
+        endif		
+
+endmenu
+
+menu "Onboard Peripheral Drivers"
+	config RT_USING_MIPI_LCD
+		bool
+		default n
+	config RT_USING_LCD
+		bool
+		default n
+	config PANEL_RK055HDMIPI4M
+		bool
+		select RT_USING_LCD
+		default n
+    config LCD_DISPLAY_ROTATE_180
+        bool
+        default n
+
+	config RT_USING_RGB_LCD
+        bool "Enable LCD"
+        select RT_USING_MIPI_LCD
+        select PANEL_RK055HDMIPI4M
+
+        default n
+
+	config RT_USING_WIFI_M8266
+		bool "Enable WLAN m8266"
+		select RT_USING_SAL
+		default y
+		
+    config BSP_USING_SDRAM
+        bool "Enable SDRAM"
+        default n
+		
+    menuconfig BSP_USING_SERVO
+	bool "Enable SERVO"
+	default n
+	
+    menuconfig BSP_USING_ETH
+	bool "Enable Ethernet"
+	select PHY_USING_KSZ8081
+	select RT_USING_NETDEV
+	default n
+	
+    menuconfig BSP_USING_SDIO
+	bool "Enable SDcard"
+	select RT_USING_SDIO
+	select RT_USING_DFS_DEVFS
+    select RT_USING_DFS
+	select RT_USING_DFS_ELMFAT
+	default n
+	
+	config NXP_USING_USB_STACK
+			bool "Use NXP USB Stack"
+			default y
+			
+		config NXP_OPENMV_DBG_COM
+			bool "second vcom"
+			depends on NXP_USING_USB_STACK
+			default n
+			
+	if RT_USING_DFS
+		menuconfig BSP_USING_SPIFLASH_PARTITION
+		bool "Enable partition on SPI Flash"
+		select USING_PARTITION
+		select BSP_USING_FLASH
+		default n
+		
+		menuconfig BSP_SPIFLASH_PARTITION_OFFSET
+		int "Start sector offset of the partition on SPI Flash(sector num)"
+		depends on BSP_USING_SPIFLASH_PARTITION
+		default 256
+		
+		menuconfig BSP_SPIFLASH_PARTITION_SIZE
+		int "Partition blocks numbers on SPI Flash"
+		depends on BSP_USING_SPIFLASH_PARTITION
+		default 4096
+	endif
+	
+	if RT_USING_USB_DEVICE
+		choice
+			prompt "select usb device controller"
+			default RT_USING_EHCI0_AS_DEVICE
+
+			config RT_USING_EHCI0_AS_DEVICE
+				bool "set EHCI0 as device"
+			config RT_USING_EHCI1_AS_DEVICE
+				bool "set EHCI1 as device"
+		endchoice
+	endif
+
+	if BSP_USING_ETH
+		config PHY_USING_KSZ8081
+			bool "i.MX RT1050EVKB uses ksz8081 phy"
+			default y
+
+			config FSL_FEATURE_PHYKSZ8081_USE_RMII50M_MODE
+				bool "Enable the PHY ksz8081 RMII50M mode"
+				depends on PHY_USING_KSZ8081
+				default y
+	endif
+	config BSP_USING_RGB
+    bool "Enable RGB LED (PWM1_CH3A, PWM4_CH0A and PWM4_CH1A)"
+    select BSP_USING_PWM1
+    select BSP_USING_PWM4
+    select BSP_USING_PWM1_CH3
+    select BSP_USING_PWM4_CH0
+    select BSP_USING_PWM4_CH1
+    default n
+    config BSP_USING_AUDIO
+        bool "Enable AUDIO (WM8960)"
+        select BSP_USING_I2C1
+        select RT_USING_AUDIO
+        default n
+        
+        if BSP_USING_AUDIO
+            menuconfig BSP_USING_AUDIO_PLAY
+            bool "Enable Audio Play"
+            default y
+			    if BSP_USING_AUDIO_PLAY
+                    config BSP_AUDIO_USING_DMA
+                        bool "Enable AUDIO DMA"
+                        default y
+				endif
+
+            menuconfig BSP_USING_AUDIO_RECORD
+            bool "Enable Audio Record"
+            select BSP_USING_AUDIO_PLAY
+            default n
+			    if BSP_USING_AUDIO_RECORD
+                    config BSP_AUDIO_USING_DMA
+                        bool "Enable AUDIO DMA"
+                        default n
+				endif			
+        endif 
+
+endmenu
+
+menu "OpenMV Hardware"
+	depends on NXP_USING_OPENMV
+	config NXP_USING_USB_STACK
+		bool "Use NXP USB Stack"
+		default y
+		
+	config NXP_OPENMV_DBG_COM
+		bool "second vcom"
+		depends on NXP_USING_USB_STACK
+		default n
+		
+	config RT_USING_CSI
+		bool "Enable CSI"
+		select RT_USING_SENSOR
+		select BSP_USING_I2C 
+		select BSP_USING_I2C6
+		default n 
+		
+	menu "CSI components"
+		depends on RT_USING_CSI
+		config RT_USING_MIPI_CSI
+			bool "Using MIPI CSI"
+			default y
+		config RT_USING_LCD
+			bool
+			default n
+		config PANEL_RK055HDMIPI4M	
+			bool
+			default n
+		config RT_USING_MIPI_LCD
+			bool "Using the onboard LCD"
+			select PANEL_RK055HDMIPI4M
+			select RT_USING_LCD
+			default n 
+		config RT_USING_MIPI_DSI
+			depends on RT_USING_MIPI_LCD 
+			bool "Using MIPI DSI"
+			default y
+	endmenu
+		
+		
+	config BSP_SENSOR_BUS_NAME
+		string "Sensor I2C Bus Name"
+		depends on RT_USING_CSI
+		default "i2c6"
+	
+	choice 
+		prompt "Select the Camera"
+		default SENSOR_OV5640
+		config SENSOR_MT9V034
+			bool "Select MT9V034"
+		config SENSOR_OV2640
+			bool "Select OV2640"
+		config SENSOR_OV5640
+			bool "Select OV5640"
+		config SENSOR_OV7725
+			bool "Select OV7725"
+		config SENSOR_OV9650
+			bool "Select OV9650"
+	endchoice
+endmenu
+
+
+endmenu

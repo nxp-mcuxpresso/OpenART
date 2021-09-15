@@ -1,0 +1,5 @@
+fn,unit,signal,hint,pinobj,comments
+hw,-,-,rt117x,nxp_evk,
+led,1,-,-,AD_04,
+led,2,-,-,AD_06,
+

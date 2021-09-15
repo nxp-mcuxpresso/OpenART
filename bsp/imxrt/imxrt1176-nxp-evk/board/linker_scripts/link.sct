@@ -1,0 +1,160 @@
+#!armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m7 -xc
+
+#define STACK_SIZE 0x2000
+
+#define m_flash_config_start           0x30000400
+#define m_flash_config_size            0x00000c00
+#define m_ivt_start                    0x30001000
+#define m_ivt_size                     0x00001000
+#define m_interrupts_start             0x30002000
+#define m_interrupts_size              0x00000400
+#define m_text_start                   0x30002400
+#define m_text_size                    0x00FBDC00
+
+#define ITCM_SIZE	64*1024
+#define DTCM_SIZE	(512 - 64)*1024
+#define WILD_PTR_PLACEHOLDER  32
+
+#define OCRAM       0x20240000
+#define OCRAM_END   0x20340000
+#define SDRAM1      0x80000000
+#define SDRAM2     	0x82000000
+#define SDRAM2_END  0x84000000
+
+#define OMV_MAIN_FB_SIZE	4*720*1280 //301*1024
+#define OMV_FB_ALLOC_OVERLAY_SIZE	120*1024 //83*1024
+#define OMV_FB_ALLOC_SIZE  1536*1024
+; must use "VECTOR_RAM", "RW_m_data", "VECTOR_ROM" as names to work with "InstallIRQHandler()" API
+#include "../../rtconfig.h"
+LR_m_text m_flash_config_start m_text_start+m_text_size-m_flash_config_start {   ; load region size_region
+	RW_m_config_text m_flash_config_start FIXED m_flash_config_size { ; load address = execution address
+	* (.boot_hdr.conf, +FIRST)
+	}
+
+	RW_m_ivt_text m_ivt_start FIXED m_ivt_size { ; load address = execution address
+	* (.boot_hdr.ivt, +FIRST)
+	* (.boot_hdr.boot_data)
+	* (.boot_hdr.dcd_data)
+	}
+
+	VECTOR_ROM m_interrupts_start FIXED m_interrupts_size { ; load address = execution address
+	* (.isr_vector,+FIRST)
+	* (InRoot$$Section)
+	}
+
+	ER_m_text m_text_start FIXED m_text_size { ; load address = execution address
+	.ANY (+RO)
+	}
+
+	ER_ITCM 0  +  WILD_PTR_PLACEHOLDER { ; Stack region growing down
+		// vm.o pendsv.o objfun.o (+RO)
+		// nlrthumb.o (+RO)
+		// framebuffer.o fb_alloc.o (+RO)
+		gc.o rt_mem*.o (+RO)
+		collections.o array.o xalloc.o (+RO)
+		arm_nn_mat*.o (+RO)
+		jpeg.o (+RO)
+		// obj.o objarray.o objfloat.o objlist.o objobject.o  (+RO)
+		// objfun.o  nativeglue.o malloc.o (+RO)	
+		// objdict.o  modmath.o modarray.o modbuiltins.o modmicropython.o map.o (+RO)
+		/*
+		acos*.o asin*.o atan*.o ceil*.o cos*.o erf*.o expf*.o expm*.o floor*.o fmod*.o (+RO)
+		frexp*.o ldex*.o lgamma*.o log*.o modff.o nanf.o nearbyintf.o powf.o roundf.o (+RO)
+		sin*.o sqrt*.o tan*.o tgammaf*.o trunc*.o dunder.o funder.o (+RO)
+		*/
+		* (.ram_code)
+		usb_*.o (+RO)
+	}
+	
+	VECTOR_RAM AlignExpr(+0, 1024) EMPTY 0x400{
+		
+	}	
+
+	#if EARLY_INIT_SEC
+	ER_EARLY_INIT +0 {
+		*(.early_init)
+	}
+	#endif
+	ER_ITCM_END ITCM_SIZE - WILD_PTR_PLACEHOLDER EMPTY 0 {}
+
+	DTCM_START_PLACEHOLDER 0x20000000 EMPTY 0 {}
+	ARM_LIB_STACK +0 EMPTY STACK_SIZE {}
+	USB_BUFFER_LAYOUT +0{
+		* (.qh_buffer_2kalign)
+		*(*m_usb_dma_init_data)
+		*(*m_usb_dma_noninit_data)
+	}
+
+	OVERLAY_CODE_Start +0 EMPTY 0 {}
+	OVERLAY_CODE_BLOB +0  30*1024 {
+		blob.o (+RO)
+	}
+
+	OVERLAY_FLASH +0  8*1024{
+		fsl_flexspi.o (+RO)
+		fsl_flash.o (+RO)
+	}
+
+	ER_DTCM +0 {
+		.ANY (+RW, +ZI)
+		sincos_tab.o (+RO)
+		* (.ram_const)
+		*(.dmaFramebuffer)
+	}
+	
+	ER_LVGL_ZI_DATA +0 NOCOMPRESS{
+		lv_*.o (+RW, +ZI)
+	}
+	
+	WEIT_CACHE_AREA +0 EMPTY WEIT_CACHE_SIZE {}
+	ARM_LIB_HEAP +0 EMPTY 0x3000 ; Heap region growing up
+	{}
+	ER_DTCM_END 0x20000000+DTCM_SIZE EMPTY 0{}
+
+	ER_OCRAM OCRAM {
+		*(.ocram)
+		* (.jpeg_buf)
+		yuv_tab.o (+RO)
+	}
+	OMV_FB_ALLOC_OVERLAY +0 EMPTY OMV_FB_ALLOC_OVERLAY_SIZE {}
+	OMV_FB_ALLOC_OVERLAY_END +0 EMPTY 0 {}	
+	ER_OCRAM_END OCRAM_END EMPTY 0 {}
+
+	RW_SRAM SDRAM1  EMPTY 0 {}
+	#define RTT_HEAP_SIZE 256*1024
+	RTT_HEAP +0 EMPTY RTT_HEAP_SIZE{} 
+	
+	
+	RTT_MPY_THREAD_STACK +0 EMPTY NXP_MICROPYTHON_THREAD_STACK_SIZE{}
+			
+	RW_NoCache 0x81e00000 {
+		* (NonCacheable.init)
+		* (*NonCacheable)
+		}
+
+	USB_BUFFER +0{
+			* (.usb_buf)
+		}
+				
+	RW_SRAM_NCACHE_END 0x82000000 EMPTY 0 {}
+
+	RW_SDRAM2 SDRAM2 EMPTY 0 {} 
+	RW_LCD_BUFFER +0 {
+		*(.lcd_buffer)
+		* (.lcd_handshake_buffer)
+	}
+	OMV_MAIN_FB +0 EMPTY OMV_MAIN_FB_SIZE  + OMV_FB_ALLOC_SIZE {}
+	//	OMV_FB_ALLOC +0 EMPTY OMV_FB_ALLOC_SIZE {}
+	OMV_FB_END +0 EMPTY 16 {}
+
+	MPY_HEAP_START +0 EMPTY PKG_MICROPYTHON_HEAP_SIZE{}
+	; <<<
+	MPY_SENSOR_BUFER_START	+0 EMPTY 12*1024*1024{}
+	; >>> SDRAM >>>
+	ER_LCD_FB +0 UNINIT 1024*1024  {
+		* (.lcd_fb)
+	}
+
+	RW_SDRAM2_END SDRAM2_END EMPTY 0 {}
+
+}

@@ -1,0 +1,19 @@
+# for module compiling
+import os
+
+from building import *
+
+objs = []
+cwd  = GetCurrentDir()
+list = os.listdir(cwd)
+
+if GetDepend(['NXP_USING_OPENMV']):
+	objs = objs + SConscript('openmv-nxp/SConscript')
+	objs = objs + SConscript('openmv-nxp/cmsis/SConscript')
+if GetDepend(['NXP_USING_MICROPYTHON']):
+	objs = objs + SConscript('micropython-nxp/SConscript')
+	objs = objs + SConscript('micropython-nxp/port/genhdr/SConscript')
+	if GetDepend(['MICROPYTHON_USING_LVGL']):
+		objs = objs + SConscript('micropython-nxp/lib/lv_binding_micropython/SConscript')
+
+Return('objs')

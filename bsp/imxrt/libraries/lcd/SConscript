@@ -1,0 +1,29 @@
+from building import *
+import rtconfig
+
+cwd = GetCurrentDir()
+
+src = []
+
+if GetDepend('RT_USING_MIPI_LCD'):
+	src += Glob('elcdif_support.c')
+	
+
+if GetDepend('PANEL_RK055HDMIPI4M'):
+	src += Glob('RK055HDMIPI4M.c')
+	src += Glob('fsl_gt911.c')
+	
+if GetDepend('PANEL_RK043FN02H'):
+	src += Glob('RK043FN02H.c')
+	src += Glob('fsl_ft5406_rt.c')
+
+LOCAL_CCFLAGS = ''    
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS += ' -std=c99'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS += ' --c99 --gnu'	
+
+path  = [cwd ]
+group = DefineGroup('LCD', src, depend = ['RT_USING_LCD'], CPPPATH = path)
+
+Return('group')

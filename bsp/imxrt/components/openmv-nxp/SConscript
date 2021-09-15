@@ -1,0 +1,69 @@
+from building import *
+import rtconfig
+
+# get current directory
+cwd     = GetCurrentDir()
+# The set of source files associated with this SConscript file.
+src     = Glob('omv_main.c')
+src    += Glob('omv/img/*.c')
+src    += Glob('omv/nn/*.c')
+src    += Glob('omv/py/py_helper.c')
+src    += Glob('omv/py/py_sensor.c')
+src    += Glob('omv/py/py_time.c')
+src    += Glob('omv/py/py_image.c')
+src    += Glob('omv/py/py_gif.c')
+src    += Glob('omv/py/py_mjpeg.c')
+src    += Glob('omv/py/py_nn.c')
+src    += Glob('omv/py/py_winc.c')
+
+src    += Glob('omv/array.c')
+src    += Glob('omv/fb_alloc.c')
+src    += Glob('omv/ff_wrapper.c')
+src    += Glob('omv/framebuffer.c')
+src    += Glob('omv/ini.c')
+src    += Glob('omv/mutex.c')
+src    += Glob('omv/trace.c')
+src    += Glob('omv/umm_malloc.c')
+src    += Glob('omv/usbdbg.c')
+if GetDepend(['MICROPYTHON_USING_USOCKET']):
+	src    += Glob('omv/wifidbg.c')
+src    += Glob('omv/xalloc.c')
+src    += Glob('omv/pendsv.c')
+
+path    = [cwd + '/omv']
+path   += [cwd + '/omv/img']
+path   += [cwd + '/omv/nn']
+path   += [cwd + '/omv/py']
+path   += [cwd + '/cmsis/include']
+
+LDFLAGS = ''
+LIBPATH = [cwd]
+LIBS = []
+if GetDepend(['NXP_USING_NNCU']):
+	path += [cwd + '/nncu']
+	src += [cwd + '/omv/py/py_nncu.c']
+	LIBPATH += [cwd + '/nncu']
+	LIBS += ['nncie_m4_m7_m33_sp_cmsisnn']	
+	
+if GetDepend(['NXP_USING_OMV_TFLITE']):
+	path += [cwd + '/libtf/cortex-m7']
+	src  += [cwd + '/omv/py/py_tf.c']
+	LIBPATH += [cwd + '/libtf/cortex-m7']
+	LIBS += ['libtf']
+	LIBS += ['libtf_person_detect_model_data']
+	
+if GetDepend(['NXP_USING_GLOW']):
+	path += [cwd + '/glow']
+	src += [cwd + '/omv/py/py_glow.c']
+
+	
+LOCAL_CCFLAGS = ''
+
+if rtconfig.CROSS_TOOL == 'gcc':
+    LOCAL_CCFLAGS += ' -std=c99'
+elif rtconfig.CROSS_TOOL == 'keil':
+    LOCAL_CCFLAGS += '-xc -std=gnu99 -mimplicit-float'
+
+group = DefineGroup('OMV', src, depend = ['NXP_USING_OPENMV'], CPPPATH = path,LOCAL_CCFLAGS=LOCAL_CCFLAGS,LINKFLAGS=LDFLAGS,LIBPATH = LIBPATH ,LIBS = LIBS)
+
+Return('group')

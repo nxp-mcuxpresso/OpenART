@@ -1,0 +1,12 @@
+# RT-Thread building script for component
+
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('*.cpp') + Glob('*.c')
+
+CPPPATH = [cwd]
+LOCAL_CCFLAGS = '-fno-exceptions -Wno-armcc-pragma-import -Wno-bad-function-cast -Wno-c++98-compat-pedantic -Wno-c11-extensions -Wno-c99-extensions -Wno-cast-qual -Wno-conversion -Wno-covered-switch-default -Wno-dollar-in-identifier-extension -Wno-double-promotion -Wno-exit-time-destructors -Wno-extern-c-compat -Wno-extra-semi-stmt -Wno-float-equal -Wno-gnu-folding-constant -Wno-inconsistent-missing-destructor-override -Wno-missing-noreturn -Wno-missing-prototypes -Wno-missing-variable-declarations -Wno-nested-anon-types -Wno-old-style-cast -Wno-padded -Wno-shadow-uncaptured-local -Wno-shadow -Wno-sign-compare -Wno-sign-conversion -Wno-switch-enum -Wno-undef -Wno-unknown-warning-option -Wno-unreachable-code-break -Wno-unreachable-code-return -Wno-unused-parameter -Wno-unused-variable -Wno-weak-vtables -Wno-zero-as-null-pointer-constant -fno-common -fdata-sections -fno-builtin -mthumb'
+group = DefineGroup('CPlusPlus', src, depend = ['RT_USING_CPLUSPLUS'], CPPPATH = CPPPATH, LOCAL_CCFLAGS=LOCAL_CCFLAGS)
+
+Return('group')

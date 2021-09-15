@@ -1,0 +1,12 @@
+#
+# Copyright (c) 2006-2018, RT-Thread Development Team
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+def unittest(data_path, temp_path):
+    import image
+    from image import SEARCH_EX, SEARCH_DS
+    img = image.Image("/sd/unittest/data/graffiti.pgm", copy_to_fb=True)
+    temp = image.Image("/sd/unittest/data/template.pgm", copy_to_fb=False)
+    r = img.find_template(temp, 0.70, step=4, search=SEARCH_DS)
+    return r == (150, 128, 40, 40)
