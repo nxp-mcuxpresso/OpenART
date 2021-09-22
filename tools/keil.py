@@ -190,15 +190,20 @@ def MDK45Project(tree, target, script):
     ProjectFiles = []
 
     # add group
+    for t in tree.find('Targets'):
+        groups = t.find('Groups')
+        groups.clear()
+        
     groups = tree.find('Targets/Target/Groups')
     if groups is None:
         groups = SubElement(tree.find('Targets/Target'), 'Groups')
+        
     groups.clear() # clean old groups
     for group in script:
         group_tree = MDK4AddGroup(ProjectFiles, groups, group['name'], group['src'], project_path)
 
         # for local CPPPATH/CPPDEFINES
-        if (group_tree != None) and ('LOCAL_CPPPATH' in group or 'LOCAL_CCFLAGS' in group or 'LOCAL_CPPDEFINES' in group):
+        if (group_tree != None) and ('LOCAL_CPPPATH' in group or 'LOCAL_CCFLAGS' in group or 'LOCAL_CPPDEFINES' in group or 'LOCAL_OPTIM' in group):
             GroupOption     = SubElement(group_tree,  'GroupOption')
             GroupArmAds     = SubElement(GroupOption, 'GroupArmAds')
             Cads            = SubElement(GroupArmAds, 'Cads')
@@ -216,6 +221,13 @@ def MDK45Project(tree, target, script):
             Undefine        = SubElement(VariousControls, 'Undefine')
             Undefine.text   = ' '
             IncludePath     = SubElement(VariousControls, 'IncludePath')
+
+            Optim = SubElement(Cads, 'Optim')
+            Optim.text = '0'
+            if 'LOCAL_OPTIM' in group:
+                level = int(filter(str.isdigit,group['LOCAL_OPTIM']))
+                Optim.text = str(level+1)
+
             if 'LOCAL_CPPPATH' in group:
                 IncludePath.text = ';'.join([_make_path_relative(project_path, os.path.normpath(i)) for i in group['LOCAL_CPPPATH']])
             else:
@@ -257,15 +269,20 @@ def MDK45Project(tree, target, script):
                     else:
                         group_tree = MDK4AddGroupForFN(ProjectFiles, groups, group['name'], lib_path, project_path)
 
-    # write include path, definitions and link flags
-    IncludePath = tree.find('Targets/Target/TargetOption/TargetArmAds/Cads/VariousControls/IncludePath')
-    IncludePath.text = ';'.join([_make_path_relative(project_path, os.path.normpath(i)) for i in CPPPATH])
-
-    Define = tree.find('Targets/Target/TargetOption/TargetArmAds/Cads/VariousControls/Define')
-    Define.text = ', '.join(set(CPPDEFINES))
-
-    Misc = tree.find('Targets/Target/TargetOption/TargetArmAds/LDads/Misc')
-    Misc.text = LINKFLAGS
+    for t in tree.find('Targets'):
+        TargetOption = t.find('TargetOption')
+        TargetArmAds = TargetOption.find('TargetArmAds')
+        Cads = TargetArmAds.find('Cads')
+        VariousControls = Cads.find('VariousControls')
+        # write include path, definitions and link flags
+        IncludePath = VariousControls.find('IncludePath')
+        IncludePath.text = ';'.join([_make_path_relative(project_path, os.path.normpath(i)) for i in CPPPATH])
+    
+        Define = VariousControls.find('Define')
+        Define.text = ', '.join(set(CPPDEFINES))
+        LDads = TargetArmAds.find('LDads')
+        Misc = LDads.find('Misc')
+        Misc.text = LINKFLAGS
 
     xml_indent(root)
     out.write(etree.tostring(root, encoding='utf-8').decode())
