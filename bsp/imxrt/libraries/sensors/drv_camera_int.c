@@ -1432,6 +1432,7 @@ int imxrt_camera_set_windowing(struct rt_camera_device *sensor, int x,int y, int
 		
 		imx_cam->fb_list.w = w;
 		imx_cam->fb_list.h = h;
+		csi_calc_first = 0;
 	}
 	return 0;
 }
