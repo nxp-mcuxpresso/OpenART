@@ -21,7 +21,7 @@
 #ifdef RT_USING_SMP
 #define rt_tick rt_cpu_index(0)->tick
 #else
-static rt_tick_t rt_tick = 0;
+static volatile rt_tick_t rt_tick = 0;
 #endif
 
 /**
@@ -72,6 +72,9 @@ void rt_tick_set(rt_tick_t tick)
 void rt_tick_increase(void)
 {
     struct rt_thread *thread;
+    rt_base_t level;
+
+    level = rt_hw_interrupt_disable();
 
     /* increase the global tick */
 #ifdef RT_USING_SMP
@@ -88,11 +91,14 @@ void rt_tick_increase(void)
     {
         /* change to initialized tick */
         thread->remaining_tick = thread->init_tick;
-
         thread->stat |= RT_THREAD_STAT_YIELD;
 
-        /* yield */
-        rt_thread_yield();
+        rt_hw_interrupt_enable(level);
+        rt_schedule();
+    }
+    else
+    {
+        rt_hw_interrupt_enable(level);
     }
 
     /* check timer */
