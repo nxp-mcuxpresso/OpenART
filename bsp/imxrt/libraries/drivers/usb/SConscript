@@ -25,6 +25,6 @@ if GetDepend('NXP_USING_OPENMV'):
 	path  += [cwd + '/omv']	
 
 
-group = DefineGroup('usb', src, depend = ['NXP_USING_USB_STACK'], CPPPATH = path, CPPDEFINES=CPPDEFINES,LOCAL_OPTIM=LOCAL_OPTIM)
+group = DefineGroup('usb', src, depend = ['NXP_USING_USB_STACK'], CPPPATH = path, CPPDEFINES=CPPDEFINES)
 
 Return('group')
