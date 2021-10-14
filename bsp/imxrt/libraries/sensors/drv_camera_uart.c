@@ -501,7 +501,7 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 {
 	struct rt_i2c_bus_device *i2c_bus;
 	
-	//³õÊ¼»¯´®¿Ú
+	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	scc8660_uart_init();
 	memset(&cam->sensor, 0, sizeof(cam->sensor));
 	
@@ -565,7 +565,7 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 	}
 #endif	
 
-	//»ñÈ¡ÉãÏñÍ·ID
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Í·ID
 	scc8660_get_id(&cam->sensor.chip_id);
 	
 	if(UART_SCC8660_ID == cam->sensor.chip_id)
@@ -1679,6 +1679,7 @@ int imxrt_camera_set_windowing(struct rt_camera_device *sensor, int x,int y, int
 		
 		imx_cam->fb_list.w = w;
 		imx_cam->fb_list.h = h;
+		csi_calc_first = 0;
 	}
 	return 0;
 }
