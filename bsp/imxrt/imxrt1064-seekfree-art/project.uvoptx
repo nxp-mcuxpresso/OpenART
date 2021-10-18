@@ -125,7 +125,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>CMSIS_AGDI</Key>
-          <Name>-X"SEEKFREE CMSIS-DAP V2" -USF13837491281940 -O206 -S8 -C0 -P00000000 -N00("ARM CoreSight SW-DP") -D00(0BD11477) -L00(0) -TO65554 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO23 -FD20000000 -FC8000 -FN1 -FF0MIMXRT1064_QSPI_4KB_SEC.FLM -FS070000000 -FL0400000 -FP0($$Device:MIMXRT1064DVL6A$arm\MIMXRT1064_QSPI_4KB_SEC.FLM)</Name>
+          <Name>-X"SEEKFREE CMSIS-DAP V1" -USF-2684294409343 -O206 -S8 -C0 -P00000000 -N00("ARM CoreSight SW-DP") -D00(0BD11477) -L00(0) -TO65554 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO23 -FD20000000 -FC8000 -FN1 -FF0MIMXRT1064_QSPI_4KB_SEC.FLM -FS070000000 -FL0400000 -FP0($$Device:MIMXRT1064DVL6A$arm\MIMXRT1064_QSPI_4KB_SEC.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -290,7 +290,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGTARM</Key>
-          <Name>(1010=-1,-1,-1,-1,0)(6017=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)(6016=160,189,500,992,0)(1012=-1,-1,-1,-1,0)</Name>
+          <Name>(1010=-1,-1,-1,-1,0)(6017=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)(6016=-1,-1,-1,-1,0)(1012=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -1245,7 +1245,7 @@
 
   <Group>
     <GroupName>Drivers</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

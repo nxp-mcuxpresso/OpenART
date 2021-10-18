@@ -1,9 +1,3 @@
-// <MCU>_prefix.c becomes the initial portion of the generated pins file.
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 #ifndef RT_CONFIG_H__
 #define RT_CONFIG_H__
 
@@ -49,7 +43,7 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
-#define RT_CONSOLE_DEVICE_NAME "uart3"
+#define RT_CONSOLE_DEVICE_NAME "uart1"
 #define RT_VER_NUM 0x40003
 #define ARCH_ARM
 #define RT_USING_CPU_FFS
@@ -264,7 +258,6 @@
 
 /* OpenMV Hardware */
 
-#define NXP_OPENMV_DBG_COM
 #define RT_USING_CSI
 #define BSP_SENSOR_UART
 #define BSP_SENSOR_BUS_NAME "i2c3"
