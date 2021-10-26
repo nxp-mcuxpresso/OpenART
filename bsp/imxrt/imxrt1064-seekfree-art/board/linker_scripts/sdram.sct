@@ -63,6 +63,12 @@ LR_XIP_FLASH ROM_BASE + 0x2000 {
 		* (.jpeg_buf)
 		sincos_tab.o (+RO)
 	}
+#if defined(MICROPYTHON_USING_LVGL)
+	ER_LVGL_ZI_DATA +0 NOCOMPRESS{
+		lv_*.o (+RW, +ZI)
+	}
+
+#endif
 	WEIT_CACHE_AREA +0 EMPTY WEIT_CACHE_SIZE {}
 
 	ARM_LIB_STACK +0 EMPTY STACK_SIZE {}

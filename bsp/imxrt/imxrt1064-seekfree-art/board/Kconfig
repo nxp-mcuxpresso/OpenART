@@ -18,6 +18,10 @@ config SOC_MIMXRT1064DVL6A
 	select SOC_IMXRT1064_SERIES
     default y
 
+config RT_USING_LCD
+    bool
+    default n
+
 menu "On-chip Peripheral Drivers"
 	menu "USB STACK"
 		config NXP_USING_USB_STACK
@@ -45,15 +49,6 @@ menu "On-chip Peripheral Drivers"
         bool "Enable GPIO"
         select RT_USING_PIN
         default y
-	
-	menuconfig BSP_USING_74HC595
-		bool "Use hc585 expension IO"
-		default y
-		if BSP_USING_74HC595
-			config BSP_74HC595_NUM
-			int "Number of 74HC595 on Boards"
-			default 2
-		endif
 	
     menuconfig BSP_USING_LPUART
         bool "Enable UART"
@@ -286,7 +281,15 @@ menu "Onboard Peripheral Drivers"
     config BSP_USING_SDRAM
         bool "Enable SDRAM"
         default n
-		
+
+    
+    
+    config PANEL_SEEKFREE18TFT
+        bool "Enable seekfree 18tft lcd"
+        select RT_USING_LCD
+        select RT_USING_TOUCH
+        default n
+
     menuconfig BSP_USING_SERVO
 	bool "Enable SERVO"
 	default n

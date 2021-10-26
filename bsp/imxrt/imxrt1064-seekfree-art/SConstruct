@@ -51,6 +51,7 @@ objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=False)
 objs = objs + SConscript('../libraries/drivers/SConscript')
 objs = objs + SConscript('../libraries/MIMXRT1062/SConscript')
 objs = objs + SConscript('../libraries/sensors/SConscript')
+objs = objs + SConscript('../libraries/lcd/SConscript')
 objs = objs + SConscript('../components/SConscript')
 
 # make a building

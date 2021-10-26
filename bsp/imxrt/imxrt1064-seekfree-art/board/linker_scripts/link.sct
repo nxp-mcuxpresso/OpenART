@@ -101,6 +101,13 @@ LR_m_text m_flash_config_start m_text_start+m_text_size-m_flash_config_start {  
 	.ANY (+RW +ZI)
 	* (NonCacheable)
 	}
+	
+#if defined(MICROPYTHON_USING_LVGL)	
+	ER_LVGL_ZI_DATA +0 NOCOMPRESS{
+		lv_*.o (+RW, +ZI)
+	}
+#endif	
+	
 	OMV_FB_ALLOC_OVERLAY +0 EMPTY OMV_FB_ALLOC_OVERLAY_SIZE {}
 	OMV_FB_ALLOC_OVERLAY_END +0 EMPTY 0 {}	
 	DTCM_END_PLACEHOLDER 0x20078000 EMPTY 0 {}

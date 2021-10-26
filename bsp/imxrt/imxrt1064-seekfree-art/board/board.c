@@ -880,9 +880,9 @@ void imxrt_sai_pins_init(void)
 #ifdef BSP_USING_SDIO
 static void BOARD_USDHCClockConfiguration(void)
 {
-    /*设置系统PLL PFD2 系数为 18*/
+
     CLOCK_InitSysPfd(kCLOCK_Pfd0, 0x12U);
-    /* 配置USDHC时钟源和分频系数 */
+    
     CLOCK_SetDiv(kCLOCK_Usdhc1Div, 0U);
     CLOCK_SetMux(kCLOCK_Usdhc1Mux, 1U);
  CLOCK_EnableClock(kCLOCK_Dma);
@@ -1119,6 +1119,57 @@ void BOARD_MIC_Pins()
 	  0x1088u); 
 }
 
+void imxrt_lcd_pins_init()
+{
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_B0_00_LPSPI3_SCK,1);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_B0_00_LPSPI3_SCK,0x3069);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_B0_01_LPSPI3_SDO,1);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_B0_01_LPSPI3_SDO,0x3069);
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_B0_03_LPSPI3_PCS0,1);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_B0_03_LPSPI3_PCS0,0x10B0u);
+    //rst
+    IOMUXC_SetPinMux(IOMUXC_GPIO_AD_B0_02_GPIO1_IO02,0);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO_AD_B0_02_GPIO1_IO02,0xB0A9u);
+    
+    //blk
+    IOMUXC_SetPinMux(IOMUXC_GPIO_B1_02_GPIO2_IO18,0);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO_B1_02_GPIO2_IO18,0xB0A9u);
+    //dc
+    IOMUXC_SetPinMux(IOMUXC_GPIO_B1_03_GPIO2_IO19,0);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO_B1_03_GPIO2_IO19,0xB0A9u);
+
+     gpio_pin_config_t config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
+
+    GPIO_PinInit(GPIO1, 2, &config);
+    GPIO_PinInit(GPIO2, 18, &config);
+    GPIO_PinInit(GPIO2, 19, &config);
+}
+
+void board_lcd_set_reset(int value)
+{
+    if(value)
+	    GPIO_WritePinOutput(GPIO1, 2, 1);
+    else
+        GPIO_WritePinOutput(GPIO1, 2, 0);
+}
+
+void board_lcd_set_dc(int value)
+{
+    if(value)
+	    GPIO_PinWrite(GPIO2, 19, 1);
+    else
+        GPIO_PinWrite(GPIO2, 19, 0);
+}
+
+void board_lcd_set_blk(int value)
+{
+    if(value)
+	    GPIO_PinWrite(GPIO2, 18, 1);
+    else
+        GPIO_PinWrite(GPIO2, 18, 0);
+}
+
+
 #ifdef NXP_USING_OMV_TFLITE
 	extern int SHT$$INIT_ARRAY$$Base[];
 	extern int SHT$$INIT_ARRAY$$Limit[];
@@ -1143,6 +1194,10 @@ void rt_hw_board_init()
 	imxrt_led_pins_init();
 	
 	imxrt_i2c_pins_init();
+
+    imxrt_lcd_pins_init();
+
+
 #ifdef BSP_USING_LPUART
     imxrt_uart_pins_init();
 #endif

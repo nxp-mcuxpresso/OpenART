@@ -380,7 +380,7 @@ static rt_uint32_t spixfer(struct rt_spi_device* device, struct rt_spi_message* 
     transfer.dataSize = message->length;
     transfer.rxData   = (uint8_t*)(message->recv_buf);
     transfer.txData   = (uint8_t*)(message->send_buf);
-    transfer.configFlags = 0;
+    transfer.configFlags = kLPSPI_MasterPcsContinuous;
 #if defined (BSP_SPI_USING_DMA)
     status = LPSPI_MasterTransferEDMA(spi->base, &spi->dma->spi_edma, &transfer);
 #else

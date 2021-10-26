@@ -10,7 +10,7 @@
       <TargetName>debug_flash</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6150000::V6.15::ARMCLANG</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -339,7 +339,7 @@
               <MiscControls>-xc -std=gnu99 -mimplicit-float -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types -Wno-absolute-value</MiscControls>
               <Define>XIP_BOOT_HEADER_ENABLE=1,XIP_BOOT_HEADER_DCD_ENABLE=1,ARM_MATH_CM7,__FPU_PRESENT,FFCONF_H="oofatfs/ffconf.h",HARD_FP,FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1, SKIP_SYSCLK_INIT, STD=C99, ENDIANNESS, FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL, CPU_MIMXRT1062DVL6A, XIP_EXTERNAL_FLASH=1, EVK_MCIMXRM, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>applications;..\components\openmv-nxp\cmsisinclude;..\..\..\libcpu\arm\common;..\..\..\libcpu\arm\cortex-m7;..\..\..\components\drivers\audio;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\spi;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;board;board\MCUX_Config;board\ports;..\libraries\drivers;..\libraries\drivers\config;..\libraries\drivers\wlan\esp8266;..\..\..\components\dfs\include;..\..\..\components\dfs\filesystems\devfs;..\..\..\components\dfs\filesystems\elmfat;..\..\..\components\dfs\filesystems\ramfs;..\..\..\components\finsh;.;..\..\..\include;..\..\..\components\libc\compilers\armlibc;..\..\..\components\libc\compilers\common;..\libraries\MIMXRT1062\CMSIS\Include;..\libraries\MIMXRT1062\MIMXRT1062;..\libraries\MIMXRT1062\MIMXRT1062\drivers;..\components\micropython-nxp;..\components\micropython-nxp\port;..\components\micropython-nxp\port\modules;..\components\micropython-nxp\port\modules\machine;..\components\micropython-nxp\lib\aia_cmm;..\components\micropython-nxp\lib\aia_doc;..\components\openmv-nxp\omv;..\components\openmv-nxp\omv\img;..\components\openmv-nxp\omv\nn;..\components\openmv-nxp\omv\py;..\components\openmv-nxp\cmsis\include;..\components\openmv-nxp\nncu;..\components\openmv-nxp\libtf\cortex-m7;..\components\openmv-nxp\glow;..\libraries\sensors;..\libraries\drivers\usb;..\libraries\drivers\usb\config;..\libraries\drivers\usb\app;..\libraries\drivers\usb\include;..\libraries\drivers\usb\phy;..\libraries\drivers\usb\device;..\libraries\drivers\usb\omv;xip</IncludePath>
+              <IncludePath>applications;..\components\openmv-nxp\cmsisinclude;..\..\..\libcpu\arm\common;..\..\..\libcpu\arm\cortex-m7;..\..\..\components\drivers\audio;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\spi;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;board;board\MCUX_Config;board\ports;..\libraries\drivers;..\libraries\drivers\config;..\libraries\drivers\wlan\esp8266;..\..\..\components\dfs\include;..\..\..\components\dfs\filesystems\devfs;..\..\..\components\dfs\filesystems\elmfat;..\..\..\components\dfs\filesystems\ramfs;..\..\..\components\finsh;.;..\..\..\include;..\..\..\components\libc\compilers\armlibc;..\..\..\components\libc\compilers\common;..\libraries\MIMXRT1062\CMSIS\Include;..\libraries\MIMXRT1062\MIMXRT1062;..\libraries\MIMXRT1062\MIMXRT1062\drivers;..\components\micropython-nxp;..\components\micropython-nxp\port;..\components\micropython-nxp\port\modules;..\components\micropython-nxp\port\modules\machine;..\components\micropython-nxp\lib\aia_cmm;..\components\micropython-nxp\lib\aia_doc;..\components\openmv-nxp\omv;..\components\openmv-nxp\omv\img;..\components\openmv-nxp\omv\nn;..\components\openmv-nxp\omv\py;..\components\openmv-nxp\cmsis\include;..\components\openmv-nxp\nncu;..\components\openmv-nxp\libtf\cortex-m7;..\components\openmv-nxp\glow;..\libraries\sensors;..\..\..\components\drivers\touch;..\..\..\components\drivers\include;..\libraries\drivers\usb;..\libraries\drivers\usb\config;..\libraries\drivers\usb\app;..\libraries\drivers\usb\include;..\libraries\drivers\usb\phy;..\libraries\drivers\usb\device;..\libraries\drivers\usb\omv;xip</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -428,7 +428,7 @@
                   <MiscControls>-xc -std=gnu99 -mimplicit-float</MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath></IncludePath>
+                  <IncludePath> </IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -722,7 +722,7 @@
                   <MiscControls></MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath></IncludePath>
+                  <IncludePath> </IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -920,6 +920,11 @@
               <FileName>drv_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\drivers\drv_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_hwtimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\drivers\drv_hwtimer.c</FilePath>
             </File>
             <File>
               <FileName>drv_rtc.c</FileName>
@@ -2351,7 +2356,7 @@
                   <MiscControls>-xc -std=gnu99 -mimplicit-float</MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath></IncludePath>
+                  <IncludePath> </IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -2815,7 +2820,7 @@
                   <MiscControls> -xc -std=gnu99 -mimplicit-float</MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath></IncludePath>
+                  <IncludePath> </IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -2873,6 +2878,16 @@
               <FileName>SCC8660.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\libraries\sensors\SCC8660.lib</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Touch</GroupName>
+          <Files>
+            <File>
+              <FileName>touch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\drivers\touch\touch.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3280,7 +3295,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -3306,7 +3321,7 @@
               <MiscControls>-xc -std=gnu99 -mimplicit-float -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types -Wno-absolute-value</MiscControls>
               <Define>XIP_BOOT_HEADER_ENABLE=1,XIP_BOOT_HEADER_DCD_ENABLE=1,ARM_MATH_CM7,__FPU_PRESENT,FFCONF_H="oofatfs/ffconf.h",HARD_FP,FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL=1, SKIP_SYSCLK_INIT, STD=C99, ENDIANNESS, FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL, CPU_MIMXRT1062DVL6A, XIP_EXTERNAL_FLASH=1, EVK_MCIMXRM, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>applications;..\components\openmv-nxp\cmsisinclude;..\..\..\libcpu\arm\common;..\..\..\libcpu\arm\cortex-m7;..\..\..\components\drivers\audio;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\spi;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;board;board\MCUX_Config;board\ports;..\libraries\drivers;..\libraries\drivers\config;..\libraries\drivers\wlan\esp8266;..\..\..\components\dfs\include;..\..\..\components\dfs\filesystems\devfs;..\..\..\components\dfs\filesystems\elmfat;..\..\..\components\dfs\filesystems\ramfs;..\..\..\components\finsh;.;..\..\..\include;..\..\..\components\libc\compilers\armlibc;..\..\..\components\libc\compilers\common;..\libraries\MIMXRT1062\CMSIS\Include;..\libraries\MIMXRT1062\MIMXRT1062;..\libraries\MIMXRT1062\MIMXRT1062\drivers;..\components\micropython-nxp;..\components\micropython-nxp\port;..\components\micropython-nxp\port\modules;..\components\micropython-nxp\port\modules\machine;..\components\micropython-nxp\lib\aia_cmm;..\components\micropython-nxp\lib\aia_doc;..\components\openmv-nxp\omv;..\components\openmv-nxp\omv\img;..\components\openmv-nxp\omv\nn;..\components\openmv-nxp\omv\py;..\components\openmv-nxp\cmsis\include;..\components\openmv-nxp\nncu;..\components\openmv-nxp\libtf\cortex-m7;..\components\openmv-nxp\glow;..\libraries\sensors;..\libraries\drivers\usb;..\libraries\drivers\usb\config;..\libraries\drivers\usb\app;..\libraries\drivers\usb\include;..\libraries\drivers\usb\phy;..\libraries\drivers\usb\device;..\libraries\drivers\usb\omv;xip</IncludePath>
+              <IncludePath>applications;..\components\openmv-nxp\cmsisinclude;..\..\..\libcpu\arm\common;..\..\..\libcpu\arm\cortex-m7;..\..\..\components\drivers\audio;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\spi;..\..\..\components\drivers\include;..\..\..\components\drivers\include;..\..\..\components\drivers\include;board;board\MCUX_Config;board\ports;..\libraries\drivers;..\libraries\drivers\config;..\libraries\drivers\wlan\esp8266;..\..\..\components\dfs\include;..\..\..\components\dfs\filesystems\devfs;..\..\..\components\dfs\filesystems\elmfat;..\..\..\components\dfs\filesystems\ramfs;..\..\..\components\finsh;.;..\..\..\include;..\..\..\components\libc\compilers\armlibc;..\..\..\components\libc\compilers\common;..\libraries\MIMXRT1062\CMSIS\Include;..\libraries\MIMXRT1062\MIMXRT1062;..\libraries\MIMXRT1062\MIMXRT1062\drivers;..\components\micropython-nxp;..\components\micropython-nxp\port;..\components\micropython-nxp\port\modules;..\components\micropython-nxp\port\modules\machine;..\components\micropython-nxp\lib\aia_cmm;..\components\micropython-nxp\lib\aia_doc;..\components\openmv-nxp\omv;..\components\openmv-nxp\omv\img;..\components\openmv-nxp\omv\nn;..\components\openmv-nxp\omv\py;..\components\openmv-nxp\cmsis\include;..\components\openmv-nxp\nncu;..\components\openmv-nxp\libtf\cortex-m7;..\components\openmv-nxp\glow;..\libraries\sensors;..\..\..\components\drivers\touch;..\..\..\components\drivers\include;..\libraries\drivers\usb;..\libraries\drivers\usb\config;..\libraries\drivers\usb\app;..\libraries\drivers\usb\include;..\libraries\drivers\usb\phy;..\libraries\drivers\usb\device;..\libraries\drivers\usb\omv;xip</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -3749,6 +3764,11 @@
               <FileName>drv_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\drivers\drv_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_hwtimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\drivers\drv_hwtimer.c</FilePath>
             </File>
             <File>
               <FileName>drv_rtc.c</FileName>
@@ -5564,6 +5584,16 @@
               <FileName>SCC8660.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\libraries\sensors\SCC8660.lib</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Touch</GroupName>
+          <Files>
+            <File>
+              <FileName>touch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\components\drivers\touch\touch.c</FilePath>
             </File>
           </Files>
         </Group>

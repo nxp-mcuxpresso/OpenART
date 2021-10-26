@@ -1259,6 +1259,12 @@ static rt_size_t imx_cam_get_frame_jpeg(struct rt_camera_device *cam, void *fram
 #define PRODUCT_PRIO   (RT_MAIN_THREAD_PRIORITY-6)
 #define CONSUME_PRIO   (RT_MAIN_THREAD_PRIORITY-5)
 
+static bool lvgl_running = false;
+void set_lvgl_running(bool enable)
+{
+	lvgl_running = enable;
+}
+
 static rt_size_t imx_cam_get_frame(struct rt_camera_device *cam, image_t * image)
 {
 	static uint32_t ls_prevTick = 0;
@@ -1279,7 +1285,7 @@ static rt_size_t imx_cam_get_frame(struct rt_camera_device *cam, image_t * image
 	}
 	
 	//relase cpu to usb debug to upload jpeg
-	if((JPEG_FB()->enabled)&&(rt_tick_get() - ls_prevTick < s_minProcessTicks)){
+	if((JPEG_FB()->enabled || lvgl_running)&&(rt_tick_get() - ls_prevTick < s_minProcessTicks)){
 			rt_thread_mdelay(s_minProcessTicks);
 	}
 	
@@ -1319,20 +1325,24 @@ static rt_size_t imx_cam_get_frame(struct rt_camera_device *cam, image_t * image
 		#endif
 		image->pixels = MAIN_FB()->pixels = new_fb_mem->ptr;	
 		SCB_CleanInvalidateDCache_by_Addr((void*)new_fb_mem->ptr,image->w*image->h*image->bpp);
-		#ifndef NO_LCD_MONITOR
-		static uint8_t fbIdx = 0;
-		LCDMonitor_Update(fbIdx++);
-		#endif
 		
-		if(old_frame){
-			if(JPEG_FB()->enabled){
-				SCB_CleanInvalidateDCache_by_Addr((void*)old_frame->ptr,image->w*image->h*image->bpp);
-				MAIN_FB()->pixels = old_frame->ptr;
-				//rt_enter_critical();
-				fb_update_jpeg_buffer(); 
-				//rt_exit_critical();
-			}else{
+		if(!lvgl_running){
+
+			#ifndef NO_LCD_MONITOR
+			static uint8_t fbIdx = 0;
+			LCDMonitor_Update(fbIdx++);
+			#endif
 			
+			if(old_frame){
+				if(JPEG_FB()->enabled){
+					SCB_CleanInvalidateDCache_by_Addr((void*)old_frame->ptr,image->w*image->h*image->bpp);
+					MAIN_FB()->pixels = old_frame->ptr;
+					//rt_enter_critical();
+					fb_update_jpeg_buffer(); 
+					//rt_exit_critical();
+				}else{
+				
+				}
 			}
 		}
 	}
@@ -1369,9 +1379,13 @@ void csi_to_handler(void* paramter)
 
 void camera_clear_by_omv_ide(void)
 {
-	imx_cam_csi_stop(pCam->rtt_device);
-	rt_event_control(&frame_event,RT_IPC_CMD_RESET,0);
+	if (pCam) {
+		imx_cam_csi_stop(pCam->rtt_device);
+		rt_event_control(&frame_event,RT_IPC_CMD_RESET,0);
+		set_lvgl_running(0);
+	}
 }
+
 
 #ifndef NO_LCD_MONITOR
 uint32_t activeFrameAddr;
