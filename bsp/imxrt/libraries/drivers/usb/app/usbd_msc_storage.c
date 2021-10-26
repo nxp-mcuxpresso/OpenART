@@ -157,24 +157,49 @@ uint32_t sdcard_get_lba_count(void)
         return 0;
     }
 	
+	rt_device_close(mss_device);
+	
 	return geometry.sector_count;
 }
 
 uint32_t sdcard_read_blocks(uint8_t *dest, uint32_t block_num, uint32_t num_blocks)
 {
+    mss_device = rt_device_find(STORAGE_DEVICE_NAME);
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_read(mss_device,block_num,dest,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_read(mss_device,block_num,dest,num_blocks);
+
+    rt_device_close(mss_device);
+    return count;
 }
 
 uint32_t sdcard_write_blocks(const uint8_t *src, uint32_t block_num, uint32_t num_blocks)
 {
+    mss_device = rt_device_find(STORAGE_DEVICE_NAME);
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_write(mss_device,block_num,src,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_write(mss_device,block_num,src,num_blocks);
+
+    rt_device_close(mss_device);
+    return count;
 }
+
 #ifdef BSP_USING_SPIFLASH_PARTITION
 uint32_t flash_start_sector = 0;
 uint32_t flash_get_lba_count(void)
@@ -206,23 +231,46 @@ uint32_t flash_get_lba_count(void)
         return 0;
     }
 	
+    rt_device_close(mss_device);
 	return geometry.sector_count;
 }
 
 uint32_t flash_read_blocks(uint8_t *dest, uint32_t block_num, uint32_t num_blocks)
 {
+    mss_device = rt_device_find("flash0");
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_read(mss_device,block_num,dest,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("flash disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_read(mss_device,block_num,dest,num_blocks);
+    rt_device_close(mss_device);
+    
+    return count;
 }
 
 uint32_t flash_write_blocks(const uint8_t *src, uint32_t block_num, uint32_t num_blocks)
 {
+	mss_device = rt_device_find("flash0");
 	if(mss_device == RT_NULL)
 		return 0;
 
-	return rt_device_write(mss_device,block_num,src,num_blocks);
+    rt_err_t st = rt_device_open(mss_device, RT_DEVICE_OFLAG_RDWR);
+	if( st != RT_EOK)
+    {
+        rt_kprintf("flash disk open error\n");
+        return 0;
+    }
+
+	int count = rt_device_write(mss_device,block_num,src,num_blocks);
+    rt_device_close(mss_device);
+
+    return count;
 }
 
 #endif
