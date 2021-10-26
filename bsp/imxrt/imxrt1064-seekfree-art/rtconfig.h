@@ -194,6 +194,14 @@
 
 /* multimedia packages */
 
+/* LVGL: powerful and easy-to-use embedded GUI library */
+
+
+/* u8g2: a monochrome graphic library */
+
+
+/* PainterEngine: A cross-platform graphics application framework written in C language */
+
 
 /* tools packages */
 
@@ -201,6 +209,9 @@
 /* system packages */
 
 /* acceleration: Assembly language or algorithmic acceleration packages */
+
+
+/* CMSIS: ARM Cortex-M Microcontroller Software Interface Standard */
 
 
 /* Micrium: Micrium software products porting for RT-Thread */
@@ -225,7 +236,6 @@
 
 #define BSP_USING_4MFLASH
 #define SOC_MIMXRT1064DVL6A
-#define RT_USING_LCD
 
 /* On-chip Peripheral Drivers */
 
@@ -259,7 +269,6 @@
 
 /* Onboard Peripheral Drivers */
 
-#define PANEL_SEEKFREE18TFT
 #define BSP_USING_SERVO
 #define BSP_USING_SDIO
 #define BSP_USING_SPIFLASH_PARTITION
