@@ -645,6 +645,16 @@ STATIC mp_obj_t py_tf_classify(uint n_args, const mp_obj_t *args, mp_map_t *kw_a
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_classify_obj, 2, py_tf_classify);
 
 
+STATIC void py_tf_profile_output_data_callback(void *callback_data,
+                                                void *model_output,
+                                                const unsigned int output_height,
+                                                const unsigned int output_width,
+                                                const unsigned int output_channels,
+                                                const bool signed_or_unsigned,
+                                                const bool is_float)
+{
+ 
+}
 
 STATIC mp_obj_t py_tf_classify_profile(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
 {
@@ -710,7 +720,7 @@ STATIC mp_obj_t py_tf_classify_profile(uint n_args, const mp_obj_t *args, mp_map
                                                      tensor_arena_size,
                                                      py_tf_input_data_callback,
                                                      &py_tf_input_data_callback_data,
-                                                     py_tf_classify_output_data_callback,
+                                                     py_tf_profile_output_data_callback,
                                                      &py_tf_classify_output_data_callback_data),
                                         py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));
 
