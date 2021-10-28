@@ -43,11 +43,14 @@
 #define m_data2_start                  0x20200000
 #define m_data2_size                   0x00080000
 
+#define RW_SRAM_END_addr			   0x81E00000
+
 #define STACK_SIZE 0x2000
 #define HEAP_SIZE  0x400
-#define OMV_MAIN_FB_SIZE	(4*720*1280) //301*1024
-#define OMV_FB_ALLOC_OVERLAY_SIZE	120*1024 //83*1024
-#define OMV_FB_ALLOC_SIZE  1536*1024
+#define OMV_FB_TOTAL_SIZE (10*1024*1024)
+#define OMV_MAIN_FB_SIZE	(4*720*1280)
+#define OMV_FB_ALLOC_SIZE  (OMV_FB_TOTAL_SIZE - OMV_MAIN_FB_SIZE)
+#define OMV_FB_ALLOC_OVERLAY_SIZE	120*1024 //fast 
 #include "../../rtconfig.h"
 LR_m_text m_flash_config_start m_text_start+m_text_size-m_flash_config_start {   ; load region size_region
 	RW_m_config_text m_flash_config_start FIXED m_flash_config_size { ; load address = execution address
@@ -126,14 +129,16 @@ LR_m_text m_flash_config_start m_text_start+m_text_size-m_flash_config_start {  
 	#if defined(NXP_USING_OPENMV)	
 	MPY_SENSOR_BUFER_START	+0 EMPTY 6*1024*1024{}
 	; <<<
+	ER_LCD_FB +0 UNINIT 1024*1024  {
+		* (.lcd_fb)
+	}
+
 	OMV_MAIN_FB +0 EMPTY OMV_MAIN_FB_SIZE  + OMV_FB_ALLOC_SIZE {}
 	//	OMV_FB_ALLOC +0 EMPTY OMV_FB_ALLOC_SIZE {}
 	OMV_FB_END +0 EMPTY 16 {}
 	; >>> SDRAM >>>
 	#endif
-	ER_LCD_FB +0 UNINIT 1024*1024  {
-		* (.lcd_fb)
-	}
+	
 	RW_SRAM_END 0x81E00000  EMPTY 0 {}
 
 	RW_SRAM_NCACHE 0x81E00000 EMPTY 0 {}
