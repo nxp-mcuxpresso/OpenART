@@ -29,6 +29,7 @@ if GetDepend('BSP_SENSOR_UART'):
 	src += Glob('drv_camera_uart.c')
 elif GetDepend('SOC_IMXRT1060_SERIES') or  GetDepend('SOC_IMXRT1064_SERIES') or GetDepend('SOC_IMXRT1050_SERIES'):
 	src += Glob('drv_camera_int.c')
+	src += Glob('mt9m114.c')
 else:
 	src += Glob('drv_camera.c')
 

@@ -657,7 +657,7 @@
                   <MiscControls></MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath></IncludePath>
+                  <IncludePath> </IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -2896,7 +2896,7 @@
                   <MiscControls>-xc -std=gnu99 -mimplicit-float</MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath></IncludePath>
+                  <IncludePath> </IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -3413,6 +3413,11 @@
               <FileName>drv_camera_int.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\sensors\drv_camera_int.c</FilePath>
+            </File>
+            <File>
+              <FileName>mt9m114.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\sensors\mt9m114.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -6803,6 +6808,11 @@
               <FileName>drv_camera_int.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\sensors\drv_camera_int.c</FilePath>
+            </File>
+            <File>
+              <FileName>mt9m114.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\sensors\mt9m114.c</FilePath>
             </File>
           </Files>
         </Group>

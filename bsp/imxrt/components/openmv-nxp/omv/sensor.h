@@ -24,6 +24,7 @@
 #define OV7725_ID       (0x77)
 #define OV5640_ID           (0x56)
 #define MT9V034_ID      (0x13)
+#define MT9M114_CHIP_ID  (0x2481)
 #define LEPTON_ID       (0x54)
 #define UART_SCC8660_ID     (0x03)
 
@@ -197,7 +198,9 @@ struct _sensor {
 	int  (*cambus_readw)		(sensor_t *sensor, uint8_t slv_addr, uint8_t reg_addr, uint16_t *reg_data) ;
 	int  (*cambus_writew)		(sensor_t *sensor, uint8_t slv_addr, uint8_t reg_addr, uint16_t reg_data);
 	int  (*cambus_readb2)      (sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t *reg_data); 
-	int  (*cambus_writeb2)      (sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t reg_data);       
+	int  (*cambus_writeb2)      (sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t reg_data);    
+    int  (*cambus_writews)      (sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t *reg_data, uint8_t size);
+    int  (*cambus_readws)      (sensor_t *sensor, uint8_t slv_addr, uint16_t reg_addr, uint8_t *reg_data, uint8_t size);
 } ;
 
 // Resolution table

@@ -8172,7 +8172,7 @@
 
   <Group>
     <GroupName>Sensors</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -8272,6 +8272,18 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+    <File>
+      <GroupNumber>15</GroupNumber>
+      <FileNumber>554</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\libraries\sensors\mt9m114.c</PathWithFileName>
+      <FilenameWithoutPath>mt9m114.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
   </Group>
 
   <Group>
@@ -8283,10 +8295,14 @@
     <File>
       <GroupNumber>16</GroupNumber>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <FileNumber>565</FileNumber>
 =======
       <FileNumber>554</FileNumber>
 >>>>>>> 6d4b59c... add sdram debug target support in projects
+=======
+      <FileNumber>555</FileNumber>
+>>>>>>> 49f83d4... add Camera MT9M114 support on mimxrt1060 evk
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8307,9 +8323,13 @@
     <File>
       <GroupNumber>17</GroupNumber>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <FileNumber>566</FileNumber>
 =======
       <FileNumber>555</FileNumber>
+=======
+      <FileNumber>556</FileNumber>
+>>>>>>> 49f83d4... add Camera MT9M114 support on mimxrt1060 evk
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8321,7 +8341,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>556</FileNumber>
+      <FileNumber>557</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8333,7 +8353,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>557</FileNumber>
+      <FileNumber>558</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8345,7 +8365,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>558</FileNumber>
+      <FileNumber>559</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8357,7 +8377,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>559</FileNumber>
+      <FileNumber>560</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8369,7 +8389,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>560</FileNumber>
+      <FileNumber>561</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8381,7 +8401,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>561</FileNumber>
+      <FileNumber>562</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8393,7 +8413,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>562</FileNumber>
+      <FileNumber>563</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8405,7 +8425,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>563</FileNumber>
+      <FileNumber>564</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8417,7 +8437,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>564</FileNumber>
+      <FileNumber>565</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8429,7 +8449,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>565</FileNumber>
+      <FileNumber>566</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8441,7 +8461,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>566</FileNumber>
+      <FileNumber>567</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8453,7 +8473,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>567</FileNumber>
+      <FileNumber>568</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8465,7 +8485,7 @@
     </File>
     <File>
       <GroupNumber>17</GroupNumber>
-      <FileNumber>568</FileNumber>
+      <FileNumber>569</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8485,8 +8505,12 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>18</GroupNumber>
+<<<<<<< HEAD
       <FileNumber>569</FileNumber>
 >>>>>>> 6d4b59c... add sdram debug target support in projects
+=======
+      <FileNumber>570</FileNumber>
+>>>>>>> 49f83d4... add Camera MT9M114 support on mimxrt1060 evk
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8502,8 +8526,12 @@
       <FileNumber>567</FileNumber>
 =======
       <GroupNumber>18</GroupNumber>
+<<<<<<< HEAD
       <FileNumber>570</FileNumber>
 >>>>>>> 6d4b59c... add sdram debug target support in projects
+=======
+      <FileNumber>571</FileNumber>
+>>>>>>> 49f83d4... add Camera MT9M114 support on mimxrt1060 evk
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -8519,8 +8547,12 @@
       <FileNumber>568</FileNumber>
 =======
       <GroupNumber>18</GroupNumber>
+<<<<<<< HEAD
       <FileNumber>571</FileNumber>
 >>>>>>> 6d4b59c... add sdram debug target support in projects
+=======
+      <FileNumber>572</FileNumber>
+>>>>>>> 49f83d4... add Camera MT9M114 support on mimxrt1060 evk
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
