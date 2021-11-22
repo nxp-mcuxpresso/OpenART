@@ -116,7 +116,7 @@ struct imxrt_camera
 	struct fb_mem_list fb_list;
 	sensor_t	sensor;
 	
-	uint8_t	sensor_id;
+	uint16_t	sensor_id;
 	uint8_t     sensor_addr;
 	GPIO_Type * sensor_pwn_io;
 	uint8_t     sensor_pwn_io_pin;
@@ -562,7 +562,7 @@ int imx_cam_sensor_cambus_readw2(sensor_t *sensor, uint8_t slv_addr, uint16_t re
 }
 
 
-int imxrt_camera_set_framerate(struct imxrt_camera *cam,framerate_t framerate)
+int imxrt_camera_set_framerate(struct imxrt_camera *cam,int framerate)
 {
     if (cam->sensor.framerate == framerate) {
        /* no change */
@@ -570,7 +570,7 @@ int imxrt_camera_set_framerate(struct imxrt_camera *cam,framerate_t framerate)
     }
 #ifdef 	SOC_IMXRT1170_SERIES
 #else		
-	if (framerate & 0x80000000)
+	if ((framerate & 0x80000000) && (cam->sensor_id == OV7725_ID))
 		CCM->CSCDR3 = framerate & (0x1F<<9);
 #endif
     /* call the sensor specific function */
@@ -634,34 +634,40 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 		{
 			cam_err("Camera Device id:0x%x\r\n",sensor_id);
 			mt9m114_init(&cam->sensor);
+			cam->sensor_id = MT9M114_CHIP_ID;
 			return;
 		}
 		else
 		{
-			imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,OV_CHIP_ID, &cam->sensor_id);
-			cam_err("Camera Device id:0x%x\r\n",cam->sensor_id);
-			switch(cam->sensor_id)
+			uint8_t sensor_id = 0;
+			imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,OV_CHIP_ID, &sensor_id);
+			cam_err("Camera Device id:0x%x\r\n",sensor_id);
+			switch(sensor_id)
 			{
 				case MT9V034_ID:
 					#ifdef SENSOR_MT9V034
 					mt9v034_init(&cam->sensor);
 					#endif
+					cam->sensor_id = MT9V034_ID;
 					return;
 				case OV9650_ID:
 					#ifdef SENSOR_OV9650
 					ov9650_init(&cam->sensor);
 					#endif
+					cam->sensor_id = OV9650_ID;
 					return;
 				case OV2640_ID:
 					#ifdef SENSOR_OV2640
 					ov2640_init(&cam->sensor);
 					#endif
+					cam->sensor_id = OV2640_ID;
 					return;
 				case OV7725_ID:
 					#ifdef SENSOR_OV7725
 					ov7725_init(&cam->sensor);
 					imxrt_camera_set_framerate(cam,0x80000000 | (2<<9|(8-1)<<11));
 					#endif
+					cam->sensor_id = OV7725_ID;
 					return;
 				default:
 					
@@ -1209,24 +1215,6 @@ void imx_cam_sensor_set_pixformat(struct imxrt_camera *cam, pixformat_t pixforma
 	cam->sensor.pixformat = pixformat;
 }
 
-rt_err_t imx_cam_sensor_set_framerate(struct imxrt_camera *cam, int rate)
-{
-	if (cam->sensor.framerate == rate)
-		return RT_ERROR;
-	if (rate & 0x80000000)
-		CCM->CSCDR3 = rate & (0x1F<<9);
-	/* call the sensor specific function */
-    if (cam->sensor.set_framerate == NULL
-        || cam->sensor.set_framerate(&cam->sensor, rate) != 0) {
-        /* operation not supported */
-        return RT_ERROR;
-    }
-
-    /* set the frame rate */
-    cam->sensor.framerate = rate;
-	return RT_EOK;
-}
-
 void imx_cam_csi_stop(struct rt_camera_device *cam)
 {
 	cam->status = RT_CAMERA_DEVICE_SUSPEND;
@@ -1252,7 +1240,7 @@ static rt_err_t imx_cam_camera_control(struct rt_camera_device *cam, rt_uint32_t
 			cam->status = RT_CAMERA_DEVICE_INIT;
 			break;
 		case RT_DRV_CAM_CMD_SET_FRAMERATE:
-			return imx_cam_sensor_set_framerate(imx_cam, parameter);
+			return imxrt_camera_set_framerate(imx_cam, parameter);
 		    break;
 		case RT_DRV_CAM_CMD_SET_CONTRAST:
 			imx_cam_sensor_set_contrast(imx_cam, parameter);
