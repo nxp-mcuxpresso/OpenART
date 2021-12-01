@@ -19,11 +19,11 @@ sensor.set_auto_exposure(True)
 sensor.set_auto_whitebal(True)
 sensor.set_brightness(2)
 sensor.set_contrast(1)
-sensor.set_gainceiling(16)
+sensor.set_gainceiling(8)
 sensor.set_pixformat(sensor.RGB565) # Set pixel format to RGB565 (or GRAYSCALE)
 sensor.set_framesize(sensor.QVGA)   # Set frame size to QVGA (320x240)
-#sensor.set_windowing((320, 240))       # Set 240x240 window.
-sensor.set_framerate(0<<9 | 1<<13)
+
+sensor.set_framerate(0<<9 | 5<<11)
 sensor.skip_frames(time = 2000)          # Wait for settings take effect.
 sensor.set_auto_gain(False)
 
@@ -145,7 +145,7 @@ def show_camera_image(image,w,h):
     )
     ui_screen_image_camera.set_src(img_dsc)
 
-#declare camera image 
+#declare camera image
 ui_screen_image_preview = lv.img(lv.scr_act(), None)
 style_screen_image_preview_main = lv.style_t()
 style_screen_image_preview_main.init()
@@ -197,36 +197,50 @@ net = tf.load(mobilenet)
 clock = time.clock()
 list_sex=["female","male"]
 
+icon_to = 0
+camera_fps = 0
+preview_icon_reflesh = 0
+detect_icon_relfesh = 0
 while(1):
+    icon_to = icon_to + 1
     image = sensor.snapshot()
     clock.tick()
     show_camera_image(image,image.width(),image.height())
-    objects = image.find_features(face_cascade, threshold=0.90, scale_factor=1.55)
+    objects = image.find_features(face_cascade, threshold=0.90, scale_factor=1.35)
     #find faces
     if(not len(objects)):
-        img_sexdetect.set_src(img_dsc_sexdetect)
-        ui_screen_image_preview.set_src(img_dsc_sexdetect_None)
+        if(icon_to > 20 and not detect_icon_relfesh):
+            img_sexdetect.set_src(img_dsc_sexdetect)
+            detect_icon_relfesh = 1
+        if (not preview_icon_reflesh):
+            ui_screen_image_preview.set_src(img_dsc_sexdetect_None)
+            preview_icon_reflesh = 1
     for r in objects:
         print("found %d:%d"%(r[2],r[3]))
+        detect_icon_relfesh = 0
+        preview_icon_reflesh =0
         if(r[2] >= 80 and r[3] >= 80):
             img = image.copy(r)
             result_img = img.resize(96,96)
             print("found face:%d,%d" % (img.width(),img.height()))
+            icon_to = 0
             send2flushpreview(result_img,result_img.width(),result_img.height())
             #model classify the faces
             for obj in tf.classify(net, result_img, min_scale=1.0, scale_mul=0.5, x_overlap=0.0, y_overlap=0.0):
                 print(obj.output())
                 list = obj.output()
-                send2flushoutput_sexdetect(w=64, h=64)
+
                 if (float(list[0]))>0.5625:
                     model_labels = list_sex[0]
                     send2flushoutput_female(w=64, h=64)
                 if (float(list[0]))<0.4375:
                     model_labels = list_sex[1]
                     send2flushoutput_male(w=64, h=64)
-                string = ("%s fps: %d" % (model_labels,clock.fps()))
+                string = ("%s fps: %d" % (model_labels,camera_fps))
                 label.set_text(string)
                 gc.collect()
+    camera_fps = clock.fps()
+    print(camera_fps)
 
 lvgl_helper.free()
 scr.delete()
