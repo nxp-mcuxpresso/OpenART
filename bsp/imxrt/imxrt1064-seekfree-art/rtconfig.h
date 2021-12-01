@@ -236,6 +236,7 @@
 
 #define BSP_USING_4MFLASH
 #define SOC_MIMXRT1064DVL6A
+#define RT_USING_LCD
 
 /* On-chip Peripheral Drivers */
 
@@ -269,6 +270,7 @@
 
 /* Onboard Peripheral Drivers */
 
+#define PANEL_SEEKFREE18TFT
 #define BSP_USING_SERVO
 #define BSP_USING_SDIO
 #define BSP_USING_SPIFLASH_PARTITION

@@ -6,11 +6,6 @@
 // --board .\pins.csv
 // --prefix mimxrt105x_prefix.c
 
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 // <MCU>_prefix.c becomes the initial portion of the generated pins file.
 
 #include <stdio.h>
