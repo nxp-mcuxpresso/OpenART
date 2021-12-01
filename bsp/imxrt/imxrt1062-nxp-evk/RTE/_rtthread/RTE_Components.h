@@ -1,8 +1,10 @@
 
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Auto generated Run-Time-Environment Configuration File
+ *      *** Do not modify ! ***
  *
- * SPDX-License-Identifier: Apache-2.0
+ * Project: 'project' 
+ * Target:  'rtthread' 
  */
 
 #ifndef RTE_COMPONENTS_H

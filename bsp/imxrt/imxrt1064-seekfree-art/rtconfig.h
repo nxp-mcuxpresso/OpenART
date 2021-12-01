@@ -225,6 +225,7 @@
 
 #define BSP_USING_4MFLASH
 #define SOC_MIMXRT1064DVL6A
+#define RT_USING_LCD
 
 /* On-chip Peripheral Drivers */
 
@@ -243,7 +244,9 @@
 #define BSP_USING_PWM1
 #define BSP_USING_PWM2
 #define BSP_USING_SPI
+#define BSP_USING_SPI1
 #define BSP_USING_SPI3
+#define BSP_USING_SPI4
 #define BSP_USING_I2C
 #define BSP_USING_I2C1
 #define HW_I2C1_BADURATE_100kHZ
@@ -256,6 +259,7 @@
 
 /* Onboard Peripheral Drivers */
 
+#define PANEL_SEEKFREE18TFT
 #define BSP_USING_SERVO
 #define BSP_USING_SDIO
 #define BSP_USING_SPIFLASH_PARTITION
@@ -295,6 +299,7 @@
 
 /* Network Module */
 
+#define MICROPYTHON_USING_LVGL
 #define NXP_MICROPYTHON_THREAD_STACK_SIZE 32768
 
 /* OpenMV */

@@ -1,13 +1,3 @@
-/*
- * This file is part of the OpenMV project.
- *
- * Copyright (c) 2013-2019 Ibrahim Abdelkader <iabdalkader@openmv.io>
- * Copyright (c) 2013-2019 Kwabena W. Agyeman <kwagyeman@openmv.io>
- *
- * This work is licensed under the MIT license, see the file LICENSE for details.
- *
- * Contrast Limited Adaptive Histogram Equalization.
- */
 const float sin_table[360] = {
      0.000000f,  0.017452f,  0.034899f,  0.052336f,  0.069756f,  0.087156f,  0.104528f,  0.121869f,
      0.139173f,  0.156434f,  0.173648f,  0.190809f,  0.207912f,  0.224951f,  0.241922f,  0.258819f,

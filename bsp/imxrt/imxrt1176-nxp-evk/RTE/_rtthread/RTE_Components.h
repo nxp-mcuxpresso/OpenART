@@ -1,10 +1,4 @@
 
-// <MCU>_prefix.c becomes the initial portion of the generated pins file.
-/*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 /*
  * Auto generated Run-Time-Environment Configuration File
  *      *** Do not modify ! ***

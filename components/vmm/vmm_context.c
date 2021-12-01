@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014, Real-Thread Information Technology Ltd
+ * COPYRIGHT (C) 2013-2014, Real-Thread Information Technology Ltd
  * All rights reserved
  * 
  * SPDX-License-Identifier: Apache-2.0

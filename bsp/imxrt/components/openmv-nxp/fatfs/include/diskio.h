@@ -1,14 +1,7 @@
-/*-----------------------------------------------------------------------*/
-/* Low level disk I/O module skeleton for FatFs     (C)ChaN, 2013        */
-/*                                                                       */
-/*   Portions COPYRIGHT 2014 STMicroelectronics                          */
-/*   Portions Copyright (C) 2012, ChaN, all right reserved               */
-/*-----------------------------------------------------------------------*/
-/* If a working storage control module is available, it should be        */
-/* attached to the FatFs via a glue function rather than modifying it.   */
-/* This is an example of glue functions to attach various exsisting      */
-/* storage control module to the FatFs module with a defined API.        */
-/*-----------------------------------------------------------------------*/
+/* This file is part of ooFatFs, a customised version of FatFs
+ * See https://github.com/micropython/oofatfs for details
+ */
+
 /*-----------------------------------------------------------------------/
 /  Low level disk interface modlue include file   (C)ChaN, 2014          /
 /-----------------------------------------------------------------------*/

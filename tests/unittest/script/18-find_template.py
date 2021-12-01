@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 def unittest(data_path, temp_path):
     import image
     from image import SEARCH_EX, SEARCH_DS

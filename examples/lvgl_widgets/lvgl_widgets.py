@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 import time, machine, pyb, os, gc
 import lvgl as lv
 import lvgl_helper

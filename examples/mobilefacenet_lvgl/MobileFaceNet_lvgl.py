@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 # 0. need to init the drv_dev & inv_dev & disp buf
 # 1. must use lv.img_dsc_t({"header:"...}) to init a var:xx as the parameter of the img.set_src(xx)
 # 2. must use lv.font_t({"font":xx}) to init a var:xx, if you want to use set_style_local_text_font()
@@ -167,7 +162,7 @@ lv.init()
 def timer_callback(self):
     lv.tick_inc(10)
     lv.task_handler()
-    #pyb.mdelay(5)
+    pyb.mdelay(5)
 
 timer = machine.Timer(1)
 timer.init(50)

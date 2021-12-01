@@ -2,9 +2,9 @@
  * File      : dhcp_server.c
  *             A simple DHCP server implementation
  *
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
- * SPDX-License-Identifier: Apache-2.0
+ * COPYRIGHT (C) 2011-2018, Shanghai Real-Thread Technology Co., Ltd
+ * http://www.rt-thread.com
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:

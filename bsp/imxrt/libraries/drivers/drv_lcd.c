@@ -1,10 +1,11 @@
 /*
  * File      : drv_lcd.c
  * This file is part of RT-Thread RTOS
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * COPYRIGHT (C) 2006-2013, RT-Thread Development Team
  *
- * SPDX-License-Identifier: Apache-2.0
- *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at
+ * http://www.rt-thread.org/license/LICENSE
  *
  * Change Logs:
  * Date           Author       Notes

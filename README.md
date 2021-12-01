@@ -80,7 +80,7 @@ Since 9th of September 2018, PRs submitted by the community may be merged into t
 
 ### Build
 
-Projects locate in bsp/imx/imxrt1062-nxp-evk(imxrt1064-seekfree-art-mini/imxrt1176-nxp-evk).
+Projects locates in bsp/imx/imxrt1062-nxp-evk(imxrt1064-seekfree-art-mini/imxrt1176-nxp-evk).
 
 Use Keil(Version 5.33 or later) to compile the project.
 

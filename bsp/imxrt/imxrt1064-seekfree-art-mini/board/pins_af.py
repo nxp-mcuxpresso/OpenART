@@ -1,8 +1,3 @@
-#
-# Copyright (c) 2006-2018, RT-Thread Development Team
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 PINS_AF = (
   ('D0_RX', (1, 'TMR4_TIMER0'), (2, 'FLEXPWM2_PWMB1'), (3, 'LPUART3_RX'), (5, 'GPIO2_PIN9'), ),
   ('D1_TX', (1, 'TMR3_TIMER2'), (2, 'FLEXPWM2_PWMA1'), (3, 'LPUART3_TX'), (5, 'GPIO2_PIN8'), ),

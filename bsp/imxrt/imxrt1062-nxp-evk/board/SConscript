@@ -4,17 +4,18 @@ from building import *
 import os
 
 cwd = GetCurrentDir()
+src = []
 # add the general drivers.
-src = Split("""
-board.c
-MCUX_Config/clock_config.c
-MCUX_Config/pin_mux.c
-""")
+src += ["board.c"]
+src += ["MCUX_Config/clock_config.c"]
+src += ["MCUX_Config/pin_mux.c"]
+
 if GetDepend(['NXP_USING_MICROPYTHON']):
+	src += ['pins_imxrtevk106x.c']
 	print("Generate PINs files...")
 	cmd = 'python .\make-pins.py -b .\pins.csv --af .\mimxrt105x_af.csv --pinmap .\mimxrt105x_pinmap.csv --prefix mimxrt105x_prefix.c --qstr .\pins_qstr.h --af-const .\pins_af_const.h --af-py .\pins_af.py > pins_imxrtevk106x.c'
 	os.popen(cmd)
-	src += ['pins_imxrtevk106x.c']
+	
 
 CPPPATH = [cwd,cwd + '/MCUX_Config',cwd + '/ports']
 

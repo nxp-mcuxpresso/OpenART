@@ -1,13 +1,3 @@
-/*
- * This file is part of the OpenMV project.
- *
- * Copyright (c) 2013-2019 Ibrahim Abdelkader <iabdalkader@openmv.io>
- * Copyright (c) 2013-2019 Kwabena W. Agyeman <kwagyeman@openmv.io>
- *
- * This work is licensed under the MIT license, see the file LICENSE for details.
- *
- * Contrast Limited Adaptive Histogram Equalization.
- */
 #include <stdint.h>
 const int8_t yuv_table[196608] = {
     -128,    0,    0,     -110,  -10,  -13,      -90,  -21,  -27,      -72,  -32,  -40,

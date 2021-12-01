@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018, Real-Thread Information Technology Ltd
+ * COPYRIGHT (C) 2018, Real-Thread Information Technology Ltd
  * 
  * SPDX-License-Identifier: Apache-2.0
  *

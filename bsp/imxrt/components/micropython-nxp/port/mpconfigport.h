@@ -448,10 +448,12 @@ extern const struct _mp_obj_module_t g_doc_module;
 #endif
 extern const struct _mp_obj_module_t mp_module_lvgl;
 extern const struct _mp_obj_module_t mp_module_lvgl_helper;
+extern const struct _mp_obj_module_t mp_module_lodepng;
 #define MICROPY_PY_LVGL_DEF \
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), MP_ROM_PTR(&mp_module_lvgl)} , \
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_lvgl_helper), MP_ROM_PTR(&mp_module_lvgl_helper)}, \
-
+    { MP_OBJ_NEW_QSTR(MP_QSTR_lodepng), MP_ROM_PTR(&mp_module_lodepng)}, 
+    
 #define LVGL_ROOT_DATA \
 	LV_ROOTS \
 	void *mp_lv_user_data; \

@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
- *
+ * COPYRIGHT (C) 2018, Real-Thread Information Technology Ltd
+ * 
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
+ * 2013-11-04     Grissiom     add comment
  */
 
 #include <rthw.h>
