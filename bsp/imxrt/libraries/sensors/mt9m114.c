@@ -502,22 +502,61 @@ static int set_framesize(sensor_t *sensor, framesize_t framesize)
 
 static int set_framerate(sensor_t *sensor, framerate_t framerate)
 {
+
+#if 0    
+    cambus_writews(sensor,MT9M114_VAR_CAM_AET_MAX_FRAME_RATE, framerate * 256,2);
+
+    cambus_writews(sensor,MT9M114_VAR_CAM_AET_MIN_FRAME_RATE, framerate * 128,2);
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
+#endif
+
     return 0;
 }
 
 
 static int set_contrast(sensor_t *sensor, int level)
 {
+    int new_level = (level > 0) ? (level * 2) : level;
+
+    if ((new_level < -16) || (32 < new_level)) {
+        return -1;
+    }
+
+    cambus_writews(sensor,MT9M114_VAR_UVC_CONTRAST_CONTROL, new_level + 32,2);
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
+
 	return 0;
 }
 
 static int set_brightness(sensor_t *sensor, int level)
 {
+    int new_level = level * 2;
+
+    if ((new_level < -32) || (32 < new_level)) {
+        return -1;
+    }
+
+    cambus_writews(sensor,MT9M114_VAR_UVC_BRIGHTNESS_CONTROL, new_level + 55,2);
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
+
 	return 0;
 }
 
 static int set_saturation(sensor_t *sensor, int level)
 {
+    int new_level = level * 8;
+
+    if ((new_level < -128) || (128 < new_level)) {
+        return -1;
+    }
+
+    new_level = IM_MIN(new_level, 127);
+
+    cambus_writews(sensor,MT9M114_VAR_UVC_SATURATION_CONTROL, new_level + 128,2);
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
+
 	return 0;
 }
 
@@ -528,51 +567,131 @@ static int set_gainceiling(sensor_t *sensor, gainceiling_t gainceiling)
 
 static int set_colorbar(sensor_t *sensor, int enable)
 {
+    cambus_writews(sensor,MT9M114_VAR_CAM_MODE_SELECT, enable ? 2 : 0,2);
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
 	return 0;
 }
 
 static int set_auto_gain(sensor_t *sensor, int enable, float gain_db, float gain_db_ceiling)
 {
+    cambus_writews(sensor,MT9M114_VAR_UVC_AE_MODE_CONTROL, enable ? 0x2 : 0x1,1);
+
+    if ((enable == 0) && (!isnanf(gain_db)) && (!isinff(gain_db))) {
+        int gain = IM_MAX(IM_MIN(fast_expf((gain_db / 20.f) * fast_log(10.f)) * 32.f, 0xffff), 0x0000);
+
+        cambus_writews(sensor, MT9M114_VAR_UVC_GAIN_CONTROL, gain,2);
+    }
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
 	return 0;
 }
 
 static int get_gain_db(sensor_t *sensor, float *gain_db)
 {
-	return 0;
+    uint16_t gain;
+
+    cambus_readws(sensor, MT9M114_VAR_UVC_GAIN_CONTROL, &gain,2);
+
+    *gain_db = 20.f * (fast_log(gain / 32.f) / fast_log(10.f));
+
+    return 0;
+
 }
 
 static int set_auto_exposure(sensor_t *sensor, int enable, int exposure_us)
 {
+    cambus_writews(sensor, MT9M114_VAR_UVC_AE_MODE_CONTROL, enable ? 0x2 : 0x1,1);
+
+    if ((enable == 0) && (exposure_us >= 0)) {
+        cambus_writews(sensor, MT9M114_VAR_UVC_MANUAL_EXPOSURE_CONFIGURATION, 0x1,1);
+
+        int exposure_100_us = exposure_us / 100;
+
+        cambus_writews(sensor, MT9M114_VAR_UVC_EXPOSURE_TIME_ABSOLUTE_CONTROL,
+                exposure_100_us >> 16,2);
+
+        cambus_writews(sensor, MT9M114_VAR_UVC_EXPOSURE_TIME_ABSOLUTE_CONTROL + 2,
+                exposure_100_us,2);
+    }
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
 	return 0;
 }
 
 static int get_exposure_us(sensor_t *sensor, int *exposure_us)
 {
-	return 0;
+	uint16_t reg_h, reg_l;
+
+    cambus_readws(sensor, MT9M114_VAR_UVC_EXPOSURE_TIME_ABSOLUTE_CONTROL, &reg_h,2);
+
+    cambus_readws(sensor, MT9M114_VAR_UVC_EXPOSURE_TIME_ABSOLUTE_CONTROL + 2, &reg_l,2);
+
+    *exposure_us = ((reg_h << 16) | reg_l) * 100;
+
+    return 0;
 }
 
 static int set_auto_whitebal(sensor_t *sensor, int enable, float r_gain_db, float g_gain_db, float b_gain_db)
 {
+    cambus_writews(sensor, MT9M114_VAR_UVC_WHITE_BALANCE_TEMPERATURE_AUTO_CONTROL, enable ? 0x1 : 0x0,1);
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
 	return 0;
 }
 
 static int get_rgb_gain_db(sensor_t *sensor, float *r_gain_db, float *g_gain_db, float *b_gain_db)
 {
+    *r_gain_db = 0;
+    *g_gain_db = 0;
+    *b_gain_db = 0;
+
 	return 0;
 }
 
 static int set_hmirror(sensor_t *sensor, int enable)
 {
+    uint16_t reg_data;
+
+    cambus_readws(sensor, MT9M114_VAR_CAM_SENSOR_CONTROL_READ_MODE, &reg_data,2);
+
+    reg_data = (reg_data & (~MT9M114_SENSOR_CONTROL_READ_MODE_HMIRROR)) |
+            (enable ? 0x0 : MT9M114_SENSOR_CONTROL_READ_MODE_HMIRROR); // inverted
+
+    cambus_writews(sensor, MT9M114_VAR_CAM_SENSOR_CONTROL_READ_MODE, reg_data,2);
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
 	return 0;
 }
 
 static int set_vflip(sensor_t *sensor, int enable)
 {
+    uint16_t reg_data;
+
+    cambus_readws(sensor, MT9M114_VAR_CAM_SENSOR_CONTROL_READ_MODE, &reg_data,2);
+
+    reg_data = (reg_data & (~MT9M114_SENSOR_CONTROL_READ_MODE_VFLIP)) |
+            (enable ? 0x0 : MT9M114_SENSOR_CONTROL_READ_MODE_VFLIP); // inverted
+
+    cambus_writews(sensor, MT9M114_VAR_CAM_SENSOR_CONTROL_READ_MODE, reg_data,2);
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
+
 	return 0;
 }
 
 static int set_special_effect(sensor_t *sensor, sde_t sde)
 {
+    switch (sde) {
+        case SDE_NEGATIVE:
+            cambus_writews(sensor, MT9M114_VAR_CAM_SFX_CONTROL, 0x3,1);
+            break;
+        case SDE_NORMAL:
+            cambus_writews(sensor, MT9M114_VAR_CAM_SFX_CONTROL, 0x0,1);
+            break;
+        default:
+            return -1;
+    }
+
+    MT9M114_SetState(sensor,MT9M114_SYS_STATE_ENTER_CONFIG_CHANGE);
 	return 0;
 }
 
@@ -607,5 +726,6 @@ void mt9m114_init(sensor_t *sensor)
     sensor->set_vflip           = set_vflip;
     sensor->set_special_effect  = set_special_effect;
     sensor->set_lens_correction = set_lens_correction;
+
 
 }

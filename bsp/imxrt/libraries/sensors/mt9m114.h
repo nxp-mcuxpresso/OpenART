@@ -610,6 +610,13 @@ void mt9m114_init(sensor_t *sensor);
 #define MT9M114_OUTPUT_FORMAT_XRGB444               (2 << 12)
 #define MT9M114_OUTPUT_FORMAT_RGB444X               (3 << 12)
 
+#define MT9M114_SENSOR_CONTROL_READ_MODE_HMIRROR    (0x1)
+#define MT9M114_SENSOR_CONTROL_READ_MODE_VFLIP      (0x2)
+#define MT9M114_SENSOR_CONTROL_READ_MODE_HBIN_MASK  (0x30)
+#define MT9M114_SENSOR_CONTROL_READ_MODE_HBIN       (0x30)
+#define MT9M114_SENSOR_CONTROL_READ_MODE_VBIN_MASK  (0x300)
+#define MT9M114_SENSOR_CONTROL_READ_MODE_VBIN       (0x300)
+
 typedef struct _mt9m114_reg
 {
     uint16_t reg;

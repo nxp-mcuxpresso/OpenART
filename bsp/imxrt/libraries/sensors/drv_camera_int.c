@@ -665,9 +665,10 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 				case OV7725_ID:
 					#ifdef SENSOR_OV7725
 					ov7725_init(&cam->sensor);
+					cam->sensor_id = OV7725_ID;
 					imxrt_camera_set_framerate(cam,0x80000000 | (2<<9|(8-1)<<11));
 					#endif
-					cam->sensor_id = OV7725_ID;
+					
 					return;
 				default:
 					
