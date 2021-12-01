@@ -727,8 +727,5 @@ void mt9m114_init(sensor_t *sensor)
     sensor->set_special_effect  = set_special_effect;
     sensor->set_lens_correction = set_lens_correction;
 
-<<<<<<< HEAD
 
-=======
->>>>>>> add Camera MT9M114 support on mimxrt1060 evk
 }
