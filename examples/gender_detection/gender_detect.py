@@ -145,11 +145,15 @@ def show_camera_image(image,w,h):
     )
     ui_screen_image_camera.set_src(img_dsc)
 
+<<<<<<< HEAD
 <<<<<<< HEAD:examples/gender_detection/gender_detect.py
 #declare camera image
 =======
 #declare camera image 
 >>>>>>> update example:gender_detect&mobile_face_net:examples/gender_detection/gender_detect.py
+=======
+#declare camera image
+>>>>>>> update example demo
 ui_screen_image_preview = lv.img(lv.scr_act(), None)
 style_screen_image_preview_main = lv.style_t()
 style_screen_image_preview_main.init()
@@ -210,6 +214,7 @@ while(1):
     image = sensor.snapshot()
     clock.tick()
     show_camera_image(image,image.width(),image.height())
+<<<<<<< HEAD
 <<<<<<< HEAD:examples/gender_detection/gender_detect.py
     objects = image.find_features(face_cascade, threshold=0.90, scale_factor=1.35)
     #find faces
@@ -227,6 +232,17 @@ while(1):
         img_sexdetect.set_src(img_dsc_sexdetect)
         ui_screen_image_preview.set_src(img_dsc_sexdetect_None)
 >>>>>>> update example:gender_detect&mobile_face_net:examples/gender_detection/gender_detect.py
+=======
+    objects = image.find_features(face_cascade, threshold=0.90, scale_factor=1.35)
+    #find faces
+    if(not len(objects)):
+        if(icon_to > 20 and not detect_icon_relfesh):
+            img_sexdetect.set_src(img_dsc_sexdetect)
+            detect_icon_relfesh = 1
+        if (not preview_icon_reflesh):
+            ui_screen_image_preview.set_src(img_dsc_sexdetect_None)
+            preview_icon_reflesh = 1
+>>>>>>> update example demo
     for r in objects:
         print("found %d:%d"%(r[2],r[3]))
         detect_icon_relfesh = 0
@@ -248,11 +264,15 @@ while(1):
                 if (float(list[0]))<0.4375:
                     model_labels = list_sex[1]
                     send2flushoutput_male(w=64, h=64)
+<<<<<<< HEAD
 <<<<<<< HEAD:examples/gender_detection/gender_detect.py
                 string = ("%s fps: %d" % (model_labels,camera_fps))
 =======
                 string = ("%s fps: %d" % (model_labels,clock.fps()))
 >>>>>>> update example:gender_detect&mobile_face_net:examples/gender_detection/gender_detect.py
+=======
+                string = ("%s fps: %d" % (model_labels,camera_fps))
+>>>>>>> update example demo
                 label.set_text(string)
                 gc.collect()
     camera_fps = clock.fps()
