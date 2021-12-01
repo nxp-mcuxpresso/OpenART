@@ -171,11 +171,12 @@ void ShowProfiling(void)
 
 char* py_tf_putchar_buffer = NULL;
 size_t py_tf_putchar_buffer_len = 0;
-
+int py_tf_putchar_buffer_index = 0;
 STATIC void alloc_putchar_buffer()
 {
     py_tf_putchar_buffer = (char *) fb_alloc0(PY_TF_PUTCHAR_BUFFER_LEN + 1, FB_ALLOC_NO_HINT);
     py_tf_putchar_buffer_len = PY_TF_PUTCHAR_BUFFER_LEN;
+	py_tf_putchar_buffer_index = 0;
 }
 
 // TF Model Object
