@@ -269,6 +269,7 @@ omv_restart:
 			g_isMainDotPyRunning = 0;	
 			fb_free_all();      
 			fb_alloc_init0();
+			post_processing(true);
 		}
 		
 		mp_printf(&mp_plat_print, "Exit from main.py!\r\n");
