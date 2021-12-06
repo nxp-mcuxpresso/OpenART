@@ -625,7 +625,7 @@ STATIC mp_obj_t py_tf_classify(uint n_args, const mp_obj_t *args, mp_map_t *kw_a
                                                      &py_tf_classify_output_data_callback_data),
                                         py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));
 
-					mp_printf(&mp_plat_print, "TFLite Inference during %dms\r\n",rt_tick_get()-tick);
+					//mp_printf(&mp_plat_print, "TFLite Inference during %dms\r\n",rt_tick_get()-tick);
                     py_tf_classification_obj_t *o = m_new_obj(py_tf_classification_obj_t);
                     o->base.type = &py_tf_classification_type;
                     o->x = mp_obj_new_int(new_roi.x);
