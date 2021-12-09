@@ -27,7 +27,7 @@
 static int xfer_bytes;
 static int xfer_length;
 static enum usbdbg_cmd cmd;
-
+volatile uint8_t s_UsbDbgIsToRunScript;
 static volatile bool script_ready;
 static volatile bool script_running;
 static vstr_t script_buf;
@@ -65,6 +65,7 @@ vstr_t *usbdbg_get_script()
 void usbdbg_set_script_running(bool running)
 {
     script_running = running;
+	s_UsbDbgIsToRunScript = running;
 }
 
 bool usbdbg_script_running()
@@ -99,7 +100,7 @@ void usbdbg_set_irq_enabled(bool enabled)
 volatile uint8_t g_omvIdeConnecting;
 __WEAK int sensor_get_id(void) {return 1;}
 __WEAK void Hook_OnUsbDbgScriptExec(void) {}
-volatile uint8_t s_UsbDbgIsToRunScript;
+
 void usbdbg_data_in(void *buffer, int length)
 {
 	//logout("usbdbg_data_in: cmd=%x, buffer=0x%08x, bytes=%d\r\n", cmd, buffer, length);
