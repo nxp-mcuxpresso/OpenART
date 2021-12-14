@@ -645,6 +645,102 @@ STATIC mp_obj_t py_tf_classify(uint n_args, const mp_obj_t *args, mp_map_t *kw_a
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_classify_obj, 2, py_tf_classify);
 
+typedef struct py_tf_logistic_input_data_callback_data
+{
+    mp_obj_t *input;
+    int scale;
+    int offset;
+    int data_size;
+}py_tf_logistic_input_data_callback_data_t;
+
+typedef struct py_tf_logistic_output_data_callback_data
+{
+    mp_obj_t out;
+}py_tf_logistic_output_data_callback_data_t;
+STATIC void py_tf_logistic_input_data_callback(void *callback_data,
+                                      void *model_input,
+                                      const unsigned int input_height,
+                                      const unsigned int input_width,
+                                      const unsigned int input_channels,
+                                      const bool signed_or_unsigned,
+                                      const bool is_float)
+{
+    py_tf_logistic_input_data_callback_data_t *arg = (py_tf_logistic_input_data_callback_data_t*)callback_data;
+    int shift = signed_or_unsigned ? 128 : 0;
+    float fscale = 1.0f / (arg->scale);
+	float offset = arg->offset * fscale;
+    int len = input_height * input_width * input_channels;
+
+    PY_ASSERT_TRUE_MSG((len == arg->data_size), "input param size not match with model input");
+    for(int i=0;i<len;i++)
+    {
+        if(is_float)
+            ((float *)model_input)[i] = mp_obj_get_int(arg->input[i])*fscale - offset;
+        else
+            ((uint8_t *)model_input)[i] =  mp_obj_get_int(arg->input[i])^shift;
+        
+        mp_printf(&mp_plat_print, "%d:%f ",mp_obj_get_int(arg->input[i]),((float *)model_input)[i]);
+    }
+}
+
+STATIC void py_tf_logistic_output_data_callback(void *callback_data,
+                                                void *model_output,
+                                                const unsigned int output_height,
+                                                const unsigned int output_width,
+                                                const unsigned int output_channels,
+                                                const bool signed_or_unsigned,
+                                                const bool is_float)
+{
+    py_tf_logistic_output_data_callback_data_t *arg = (py_tf_logistic_output_data_callback_data_t*)callback_data;
+	int shift = signed_or_unsigned ? 128 : 0;
+	
+    arg->out = mp_obj_new_list(output_channels, NULL);
+    for (unsigned int i = 0; i < output_channels; i++) {
+        if (!is_float) {
+            ((mp_obj_list_t *) arg->out)->items[i] = mp_obj_new_float((((uint8_t *) model_output)[i] ^ shift) / 255.0f);
+        } else {
+            ((mp_obj_list_t *) arg->out)->items[i] = mp_obj_new_float(((float *) model_output)[i]);
+        }
+    }
+}
+
+STATIC mp_obj_t py_tf_logistic(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+{
+    py_tf_model_obj_t *arg_model = py_tf_load_alloc(args[0]);
+    py_tf_logistic_input_data_callback_data_t py_tf_logistic_input_data_callback_data;
+    py_tf_logistic_output_data_callback_data_t py_tf_logistic_output_data_callback_data;
+
+    int data_size = py_helper_keyword_int(n_args, args, 2, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_size), 1);	
+    int fscale = py_helper_keyword_int(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_scale), 128);
+    int offset = py_helper_keyword_int(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_offset), 0);
+    py_tf_logistic_input_data_callback_data.input = mp_obj_new_list(data_size, NULL);
+    mp_obj_get_array_fixed_n(args[1], data_size, &py_tf_logistic_input_data_callback_data.input);
+    py_tf_logistic_input_data_callback_data.data_size = data_size;
+
+    py_tf_logistic_input_data_callback_data.scale = fscale;
+    py_tf_logistic_input_data_callback_data.offset = offset;
+    fb_alloc_mark();
+
+    uint32_t tensor_arena_size;
+    uint8_t *tensor_arena = fb_alloc_all(&tensor_arena_size, FB_ALLOC_PREFER_SIZE);
+    mp_obj_t objects_list = mp_obj_new_list(0, NULL);
+
+    PY_ASSERT_FALSE_MSG(libtf_invoke(arg_model->model_data,
+                                                     tensor_arena,
+                                                     tensor_arena_size,
+                                                     py_tf_logistic_input_data_callback,
+                                                     &py_tf_logistic_input_data_callback_data,
+                                                     py_tf_logistic_output_data_callback,
+                                                     &py_tf_logistic_output_data_callback_data),
+                                        py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));
+
+    mp_obj_list_append(objects_list, py_tf_logistic_output_data_callback_data.out);                                    
+    fb_alloc_free_till_mark();
+
+    return objects_list;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_logistic_obj,2,py_tf_logistic);
+
 
 STATIC void py_tf_profile_output_data_callback(void *callback_data,
                                                 void *model_output,
@@ -843,6 +939,8 @@ STATIC const mp_rom_map_elem_t locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_signed), MP_ROM_PTR(&py_tf_signed_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_float), MP_ROM_PTR(&py_tf_is_float_obj) },
     { MP_ROM_QSTR(MP_QSTR_classify), MP_ROM_PTR(&py_tf_classify_obj) },
+    { MP_ROM_QSTR(MP_QSTR_logistic),        MP_ROM_PTR(&py_tf_logistic_obj) },
+	{ MP_ROM_QSTR(MP_QSTR_regress),        MP_ROM_PTR(&py_tf_logistic_obj) },
     { MP_ROM_QSTR(MP_QSTR_profile), MP_ROM_PTR(&py_tf_classify_profile_obj)},
     { MP_ROM_QSTR(MP_QSTR_segment), MP_ROM_PTR(&py_tf_segment_obj) }
 };
@@ -864,6 +962,8 @@ STATIC const mp_rom_map_elem_t globals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_load),            MP_ROM_PTR(&py_tf_load_obj) },
     { MP_ROM_QSTR(MP_QSTR_free_from_fb),    MP_ROM_PTR(&py_tf_free_from_fb_obj) },
     { MP_ROM_QSTR(MP_QSTR_classify),        MP_ROM_PTR(&py_tf_classify_obj) },
+    { MP_ROM_QSTR(MP_QSTR_logistic),        MP_ROM_PTR(&py_tf_logistic_obj) },
+    { MP_ROM_QSTR(MP_QSTR_regress),        MP_ROM_PTR(&py_tf_logistic_obj) },
     { MP_ROM_QSTR(MP_QSTR_profile),         MP_ROM_PTR(&py_tf_classify_profile_obj)},
     { MP_ROM_QSTR(MP_QSTR_segment),         MP_ROM_PTR(&py_tf_segment_obj) },
 #else
