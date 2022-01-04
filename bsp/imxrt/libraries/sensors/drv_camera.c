@@ -687,6 +687,7 @@ void imx_cam_sensor_init(struct imxrt_camera *cam)
 	if(cam->sensor_id == OV5640_ID)
 	{
 		ov5640_init(&cam->sensor);
+		cam->sensor.isMipi = 1;
 	}
 	#else
 	imx_cam_sensor_read_reg(i2c_bus,cam->sensor_addr,ON_CHIP_ID, &cam->sensor_id);
