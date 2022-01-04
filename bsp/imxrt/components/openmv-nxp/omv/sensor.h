@@ -156,7 +156,7 @@ struct _sensor {
     int fb_w, fb_h;             // Backup for MAIN_FB().
     uint16_t wndX, wndY, wndW, wndH;
 	uint8_t isWindowing;
-
+    uint8_t isMipi;
     polarity_t pwdn_pol;        // PWDN polarity (TODO move to hw_flags)
     polarity_t reset_pol;       // Reset polarity (TODO move to hw_flags)
 

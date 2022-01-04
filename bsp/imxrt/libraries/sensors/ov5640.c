@@ -679,24 +679,37 @@ static int set_framesize(sensor_t *sensor, framesize_t framesize)
             return -1;
     }
 
-    ret |= sensor->cambus_writeb2(sensor, sensor->slv_addr, SC_PLL_CONTRL2, pll);
-	
-	
-	clock_config_t *config = get_clock_config(framesize, sensor->framerate);
-	if(config){
-		sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3035, config->pllCtrl1);
-		sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3036, config->pllCtrl2);
-		sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x460c, config->vfifoCtrl0C);
-		sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3824, config->pclkDiv);
-		sensor->cambus_writeb2(sensor, sensor->slv_addr,  0x4837, config->pclkPeriod);
-	}else{
-		return -1;
-	}
+    if(sensor->isMipi)
+    {
+        ret |= sensor->cambus_writeb2(sensor, sensor->slv_addr, SC_PLL_CONTRL2, pll);
+        
+        clock_config_t *config = get_clock_config(framesize, sensor->framerate);
+        if(config){
+            sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3035, config->pllCtrl1);
+            sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3036, config->pllCtrl2);
+            sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x460c, config->vfifoCtrl0C);
+            sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3824, config->pclkDiv);
+            sensor->cambus_writeb2(sensor, sensor->slv_addr,  0x4837, config->pclkPeriod);
+        }else{
+            return -1;
+        }
+    }
+    else
+    {
+        sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3034, 0x1a);
+        sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3017, 0xff);
+        sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3018, 0xff);
+        sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x300e, 0x58);
+    }
+
+    sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x5000, 0xa7);
+    sensor->cambus_writeb2(sensor, sensor->slv_addr, 0x3008, 0x02);
 
     // Delay 300 ms
     systick_sleep(300);
 
     return ret;
+	
 	#endif
 }
 
