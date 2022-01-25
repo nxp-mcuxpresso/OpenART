@@ -6,13 +6,12 @@
 # gender detection with lvgl example
 #
 
-import sensor, image, time, machine, pyb, os, tf,gc
+#import modules
+import sensor, image, time, machine, pyb,tf,gc
 import lvgl as lv
 import lvgl_helper
-import micropython
-import math
 from imagetools import get_png_info, open_png
-
+#Initialize camera sensor
 sensor.reset()
 sensor.set_auto_gain(True)
 sensor.set_auto_exposure(True)
@@ -22,15 +21,9 @@ sensor.set_contrast(1)
 sensor.set_gainceiling(8)
 sensor.set_pixformat(sensor.RGB565) # Set pixel format to RGB565 (or GRAYSCALE)
 sensor.set_framesize(sensor.QVGA)   # Set frame size to QVGA (320x240)
-
-sensor.set_framerate(0<<9 | 5<<11)
 sensor.skip_frames(time = 2000)          # Wait for settings take effect.
 sensor.set_auto_gain(False)
-
 clock = time.clock()                # Create a clock object to track the FPS.
-
-
-
 #Initialize LVGL
 lv.init()
 #lvgl task hander called in timer
