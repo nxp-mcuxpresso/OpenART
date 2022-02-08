@@ -11,7 +11,7 @@
 
 OpenART is an open source AI develop and verify kit base on NXP MCU, which supported most popular machine learning inference engines: TFlite-Micro and Glow.
 
-It provide a convenient and efficient method to verify the modes : execute the modes in python script base on micropython and OpenMV library . And also support LVGL python bindings library, that means you can implement  a AI application with UI by python too.
+It provide a convenient and efficient method to verify the models : execute the models in python script base on micropython and OpenMV library . And also support LVGL python bindings library, that means you can implement  a AI application with UI by python too.
 
 ## Overview
 
