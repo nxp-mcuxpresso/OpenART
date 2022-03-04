@@ -93,9 +93,9 @@ Open the project in MDK and compile it.
 
   2 Connect the debug COM with PC
   
-  3 Plugin the SD Card, copy the model file , MobileFaceNet_lvgl.py 
+  3 Plugin the SD Card, copy the model file , python scripts
   
-  ​    4 Rename  gender_detect.py to main.py, copy to SD Card.
+  ​    4 Rename  face_recognize.py to main.py, copy to SD Card.
   
   ​    5 Reset the board, omv thread will run into main.py
   
@@ -103,7 +103,7 @@ Open the project in MDK and compile it.
   
   ​	4 Reset the borad, board run into omv thread and connect with OpenMV IDE through usb cable.
   
-  ​	5 Execute the gender_detect.py in openMV IDE, disable Frame Buffer on the right top
+  ​	5 Execute the face_recognize.py in openMV IDE, disable Frame Buffer on the right top
   
 - 6 Add face by press button "Add Face". showing yourself in front of the camera. If your face is found ,there will be a message box to ask you to add the face, press yes. 
 

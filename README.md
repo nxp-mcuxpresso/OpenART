@@ -50,8 +50,9 @@ version: Micropython 1.12
 
 - Cifar10 example in 'examples\cifar10_lvgl'
 - LVGL Widgets example  in examples\lvgl_widgets
-- Face recognition example in examples\mobilefacenet_lvgl
+- Face recognition example in examples\face_recognize
 - Gender Detection example in examples\gender_detection
+- person detect example in examples\ssd_person_detect
 
 ## License
 
