@@ -7,7 +7,7 @@
 #include "py/mphal.h"
 #include "extmod/virtpin.h"
 #include "pin_defs_mcu.h"
-
+#include "cfg_mux_mgr.h"
 /// \moduleref pyb
 /// \class Pin - control I/O pins
 ///
@@ -323,8 +323,21 @@ const pin_obj_t *pin_find(mp_obj_t user_obj) {
         }
         return pin_obj;
     }
-#endif	
+#endif
+    if (mp_obj_is_qstr(user_obj))
+    {//find single in cmm_cfg.cvs
+        MuxItem_t mux;
+        mp_obj_t pinobj;
 
+        char *single_str;
+        size_t single_len=0;
+        single_str = (char*)mp_obj_str_get_str(user_obj);
+        Mux_Take(&pinobj,"pin",-1,single_str,&mux);
+        if(!((mux.pPinObj == mp_const_none) || (mux.pPinObj == 0) || (mp_obj_is_small_int(mux.pPinObj)&&(mp_obj_get_int(mux.pPinObj) == 0))))
+        {
+            return mux.pPinObj;
+        }
+    }
     nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "pin '%s' not a valid pin identifier", mp_obj_str_get_str(user_obj)));
 }
 
