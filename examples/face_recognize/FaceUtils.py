@@ -86,7 +86,8 @@ def findFaceinList(arr, angle_threadhold,angle_sensitive):
     i = 0
     index = -1
     for dict in db_list:
-        min_temp = cmath.calc_angle_float(arr,dict['vector'])#defined in cmath module
+        min_temp = cmath.calc_angle_float(arr,dict['vector'])
+        #defined in cmath module
         if (min >= min_temp and min_temp <= angle_threadhold + angle_sensitive):
             min = min_temp
             index = dict['idx']

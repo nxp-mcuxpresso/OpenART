@@ -84,42 +84,6 @@ def add_face_cb(obj = None, event=-1 ):
 
         print("add face :%d" % add_face_enable)
 
-ui_screen_add_face = lv.btn(lv.scr_act(), None)
-style_screen_add_face_main = lv.style_t()
-style_screen_add_face_main.init()
-style_screen_add_face_main.set_radius(lv.STATE.DEFAULT, 50)
-style_screen_add_face_main.set_bg_color(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
-style_screen_add_face_main.set_bg_grad_color(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
-style_screen_add_face_main.set_bg_grad_dir(lv.STATE.DEFAULT, lv.GRAD_DIR.VER)
-style_screen_add_face_main.set_bg_opa(lv.STATE.DEFAULT, 255)
-style_screen_add_face_main.set_border_color(lv.STATE.DEFAULT, lv.color_make(0x01, 0xa2, 0xb1))
-style_screen_add_face_main.set_border_width(lv.STATE.DEFAULT, 2)
-style_screen_add_face_main.set_border_opa(lv.STATE.DEFAULT, 255)
-style_screen_add_face_main.set_outline_color(lv.STATE.DEFAULT, lv.color_make(0xd4, 0xd7, 0xd9))
-style_screen_add_face_main.set_outline_opa(lv.STATE.DEFAULT, 255)
-
-
-ui_screen_add_face.add_style(ui_screen_add_face.PART.MAIN, style_screen_add_face_main)
-ui_screen_add_face.set_pos(16, 28)
-ui_screen_add_face.set_size(80, 40)
-ui_screen_add_face_label = lv.label(ui_screen_add_face, None)
-ui_screen_add_face_label.set_text("Add Face")
-ui_screen_add_face_label.set_style_local_text_color(ui_screen_add_face_label.PART.MAIN, lv.STATE.DEFAULT, lv.color_make(0x00, 0x00, 0x00))
-ui_screen_add_face.set_event_cb(add_face_cb)
-
-ui_screen_image_camera = lv.img(lv.scr_act(), None)
-style_screen_image_camera_main = lv.style_t()
-style_screen_image_camera_main.init()
-style_screen_image_camera_main.set_image_recolor(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
-style_screen_image_camera_main.set_image_recolor_opa(lv.STATE.DEFAULT, 0)
-style_screen_image_camera_main.set_image_opa(lv.STATE.DEFAULT, 255)
-ui_screen_image_camera.add_style(ui_screen_image_camera.PART.MAIN, style_screen_image_camera_main)
-ui_screen_image_camera.set_pos(111, 45)
-ui_screen_image_camera.set_size(256, 192)
-camera_label = lv.label(lv.scr_act())
-camera_label.align(lv.scr_act(),lv.ALIGN.IN_TOP_MID,0,0)
-camera_label.set_text("Not match")
-
 def show_Cam_Image(img,w,h):
     img_dsc = lv.img_dsc_t(
         {
@@ -130,26 +94,10 @@ def show_Cam_Image(img,w,h):
     )
     ui_screen_image_camera.set_src(img_dsc)
 
-ui_screen_image_result = lv.img(lv.scr_act(), None)
-style_screen_image_result_main = lv.style_t()
-style_screen_image_result_main.init()
-style_screen_image_result_main.set_image_recolor(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
-style_screen_image_result_main.set_image_recolor_opa(lv.STATE.DEFAULT, 0)
-style_screen_image_result_main.set_image_opa(lv.STATE.DEFAULT, 255)
-ui_screen_image_result.add_style(ui_screen_image_result.PART.MAIN, style_screen_image_result_main)
-ui_screen_image_result.set_pos(20, 162)
-ui_screen_image_result.set_size(64, 64)
-ui_screen_image_result.set_src(lv.SYMBOL.DUMMY)
-
-def clearResultImage(obj):
+def clearResultImage_cb(obj):
     ui_screen_image_result.set_src(lv.SYMBOL.DUMMY)
     #print("image clear task")
     camera_label.set_text("Finding Face")
-
-clear_res_task = lv.task_create_basic()
-clear_res_task.set_cb(clearResultImage)
-clear_res_task.set_repeat_count(1)
-clear_res_task.set_period(2000)
 
 def showResultImage(idx):
     global clear_res_task
@@ -172,25 +120,10 @@ def showResultImage(idx):
     clear_res_task.reset()
     clear_res_task.set_repeat_count(0)
     clear_res_task = lv.task_create_basic()
-    clear_res_task.set_cb(clearResultImage)
+    clear_res_task.set_cb(clearResultImage_cb)
     clear_res_task.set_repeat_count(1)
     clear_res_task.set_period(2000)
 
-
-
-
-ui_screen_image_preview = lv.img(lv.scr_act(), None)
-style_screen_image_preview_main = lv.style_t()
-style_screen_image_preview_main.init()
-style_screen_image_preview_main.set_image_recolor(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
-style_screen_image_preview_main.set_image_recolor_opa(lv.STATE.DEFAULT, 0)
-style_screen_image_preview_main.set_image_opa(lv.STATE.DEFAULT, 255)
-ui_screen_image_preview.add_style(ui_screen_image_preview.PART.MAIN, style_screen_image_preview_main)
-ui_screen_image_preview.set_pos(308, 45)
-ui_screen_image_preview.set_size(64, 64)
-ui_screen_image_preview.set_src(lv.SYMBOL.DUMMY)
-snapstop = 0
-face_image = sensor.snapshot()
 def msg_box_callback(obj,event):
     global add_face_enable
     global snapstop
@@ -255,31 +188,112 @@ def show_Face_Image(img, w=64, h=64):
 
         print("find %d:%d during:%d" % (idx,angle,pyb.millis()-millis))
 
-
-sens_label = lv.label(lv.scr_act())
-sens_label.align(lv.scr_act(),lv.ALIGN.IN_TOP_MID,0,0)
-sens_label.set_text("")
 def reduce_sens_cb(obj,evt):
     global angle_sensitive
     if evt == lv.EVENT.CLICKED:
         if (angle_sensitive > 1):
             angle_sensitive = angle_sensitive -1
-            sens_label.set_text("sensitivity is %d"%angle_sensitive)
-
+            camera_label.set_text("Threshold is %d"%(angle_sensitive+angle_threadhold))
 
 def inc_sens_cb(obj, evt):
     global angle_sensitive
     if evt == lv.EVENT.CLICKED:
         if (angle_sensitive < 20):
             angle_sensitive = angle_sensitive +1
-            sens_label.set_text("sensitivity is %d"%angle_sensitive)
+            camera_label.set_text("Threshold is %d"%(angle_sensitive+angle_threadhold))
 
 def reset_sens_cb(obj, evt):
     global angle_sensitive
     if evt == lv.EVENT.CLICKED:
         angle_sensitive = 10
-        sens_label.set_text("sensitivity is %d"%angle_sensitive)
+        camera_label.set_text("Threshold is %d"%(angle_sensitive+angle_threadhold))
 
+def clear_msg_box_callback(obj,event):
+    global snapstop
+    global load_db
+    if event == lv.EVENT.VALUE_CHANGED:
+        print("save faces:%d %s"% (obj.get_active_btn(),obj.get_active_btn_text()))
+        obj.start_auto_close(0)
+        if obj.get_active_btn() == 0:
+            clear_faces()
+            load_db = 0
+
+        snapstop = 0
+
+def clear_face_cb(obj = None, event=-1 ):
+    global snapstop
+    if event == lv.EVENT.CLICKED:
+        snapstop = 1
+        mbox = lv.msgbox(lv.scr_act(), None)
+        btn_string = ['Yes','No','']
+        mbox.add_btns(btn_string)
+        mbox.set_text("Are you sure to clear all faces ?")
+        mbox.set_event_cb(clear_msg_box_callback)
+#draw UI
+style_screen_add_face_main = lv.style_t()
+style_screen_add_face_main.init()
+style_screen_add_face_main.set_radius(lv.STATE.DEFAULT, 50)
+style_screen_add_face_main.set_bg_color(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
+style_screen_add_face_main.set_bg_grad_color(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
+style_screen_add_face_main.set_bg_grad_dir(lv.STATE.DEFAULT, lv.GRAD_DIR.VER)
+style_screen_add_face_main.set_bg_opa(lv.STATE.DEFAULT, 255)
+style_screen_add_face_main.set_border_color(lv.STATE.DEFAULT, lv.color_make(0x01, 0xa2, 0xb1))
+style_screen_add_face_main.set_border_width(lv.STATE.DEFAULT, 2)
+style_screen_add_face_main.set_border_opa(lv.STATE.DEFAULT, 255)
+style_screen_add_face_main.set_outline_color(lv.STATE.DEFAULT, lv.color_make(0xd4, 0xd7, 0xd9))
+style_screen_add_face_main.set_outline_opa(lv.STATE.DEFAULT, 255)
+
+camera_label = lv.label(lv.scr_act())
+camera_label.align(lv.scr_act(),lv.ALIGN.IN_TOP_MID,0,0)
+camera_label.set_text("Not match")
+
+ui_screen_image_camera = lv.img(lv.scr_act(), None)
+style_screen_image_camera_main = lv.style_t()
+style_screen_image_camera_main.init()
+style_screen_image_camera_main.set_image_recolor(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
+style_screen_image_camera_main.set_image_recolor_opa(lv.STATE.DEFAULT, 0)
+style_screen_image_camera_main.set_image_opa(lv.STATE.DEFAULT, 255)
+ui_screen_image_camera.add_style(ui_screen_image_camera.PART.MAIN, style_screen_image_camera_main)
+ui_screen_image_camera.set_pos(120, 40)
+ui_screen_image_camera.set_size(240, 200)
+
+ui_screen_add_face = lv.btn(lv.scr_act(), None)
+ui_screen_add_face.add_style(ui_screen_add_face.PART.MAIN, style_screen_add_face_main)
+ui_screen_add_face.set_pos(16, 28)
+ui_screen_add_face.set_size(80, 40)
+ui_screen_add_face_label = lv.label(ui_screen_add_face, None)
+ui_screen_add_face_label.set_text("Add Face")
+ui_screen_add_face_label.set_style_local_text_color(ui_screen_add_face_label.PART.MAIN, lv.STATE.DEFAULT, lv.color_make(0x00, 0x00, 0x00))
+ui_screen_add_face.set_event_cb(add_face_cb)
+
+ui_screen_image_result = lv.img(lv.scr_act(), None)
+style_screen_image_result_main = lv.style_t()
+style_screen_image_result_main.init()
+style_screen_image_result_main.set_image_recolor(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
+style_screen_image_result_main.set_image_recolor_opa(lv.STATE.DEFAULT, 0)
+style_screen_image_result_main.set_image_opa(lv.STATE.DEFAULT, 255)
+ui_screen_image_result.add_style(ui_screen_image_result.PART.MAIN, style_screen_image_result_main)
+ui_screen_image_result.set_pos(20, 162)
+ui_screen_image_result.set_size(64, 64)
+ui_screen_image_result.set_src(lv.SYMBOL.DUMMY)
+
+clear_res_task = lv.task_create_basic()
+clear_res_task.set_cb(clearResultImage_cb)
+clear_res_task.set_repeat_count(1)
+clear_res_task.set_period(2000)
+
+ui_screen_image_preview = lv.img(lv.scr_act(), None)
+style_screen_image_preview_main = lv.style_t()
+style_screen_image_preview_main.init()
+style_screen_image_preview_main.set_image_recolor(lv.STATE.DEFAULT, lv.color_make(0xff, 0xff, 0xff))
+style_screen_image_preview_main.set_image_recolor_opa(lv.STATE.DEFAULT, 0)
+style_screen_image_preview_main.set_image_opa(lv.STATE.DEFAULT, 255)
+ui_screen_image_preview.add_style(ui_screen_image_preview.PART.MAIN, style_screen_image_preview_main)
+ui_screen_image_preview.set_pos(296, 40)
+ui_screen_image_preview.set_size(64, 64)
+ui_screen_image_preview.set_src(lv.SYMBOL.DUMMY)
+snapstop = 0
+face_image = sensor.snapshot()
 ui_screen_sens_inc = lv.btn(lv.scr_act(), None)
 style_screen_sens_inc_main = lv.style_t()
 style_screen_sens_inc_main.init()
@@ -359,30 +373,6 @@ style_screen_del_face_main.set_border_width(lv.STATE.DEFAULT, 2)
 style_screen_del_face_main.set_border_opa(lv.STATE.DEFAULT, 255)
 style_screen_del_face_main.set_outline_color(lv.STATE.DEFAULT, lv.color_make(0xd4, 0xd7, 0xd9))
 style_screen_del_face_main.set_outline_opa(lv.STATE.DEFAULT, 255)
-
-
-def clear_msg_box_callback(obj,event):
-    global snapstop
-    global load_db
-    if event == lv.EVENT.VALUE_CHANGED:
-        print("save faces:%d %s"% (obj.get_active_btn(),obj.get_active_btn_text()))
-        obj.start_auto_close(0)
-        if obj.get_active_btn() == 0:
-            clear_faces()
-            load_db = 0
-
-        snapstop = 0
-
-
-def clear_face_cb(obj = None, event=-1 ):
-    global snapstop
-    if event == lv.EVENT.CLICKED:
-        snapstop = 1
-        mbox = lv.msgbox(lv.scr_act(), None)
-        btn_string = ['Yes','No','']
-        mbox.add_btns(btn_string)
-        mbox.set_text("Are you sure to clear all faces ?")
-        mbox.set_event_cb(clear_msg_box_callback)
 
 ui_screen_del_face.add_style(ui_screen_del_face.PART.MAIN, style_screen_del_face_main)
 ui_screen_del_face.set_pos(16, 92)
