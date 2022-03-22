@@ -3259,12 +3259,16 @@ STATIC mp_obj_t py_image_rotation_corr(uint n_args, const mp_obj_t *args, mp_map
     float arg_zoom =
         py_helper_keyword_float(n_args, args, 6, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_zoom), 1.0);
     PY_ASSERT_TRUE_MSG(arg_zoom > 0.0, "Zoom must be > 0!");
+    float arg_fov =
+        IM_DEG2RAD(py_helper_keyword_float(n_args, args, 7, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_fov), 60.0f));
+    PY_ASSERT_TRUE_MSG((0.0f < arg_fov) && (arg_fov < 180.0f), "FOV must be > 0 and < 180!");
+    float *arg_corners = py_helper_keyword_corner_array(n_args, args, 8, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_corners));
 
     fb_alloc_mark();
     imlib_rotation_corr(arg_img,
                         arg_x_rotation, arg_y_rotation, arg_z_rotation,
                         arg_x_translation, arg_y_translation,
-                        arg_zoom);
+                        arg_zoom,arg_fov,arg_corners);
     fb_alloc_free_till_mark();
     return args[0];
 }
