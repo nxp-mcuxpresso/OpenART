@@ -34,8 +34,8 @@
 
 // if a port didn't define MSB/LSB constants then provide them
 #ifndef MICROPY_PY_MACHINE_SPI_MSB
-#define MICROPY_PY_MACHINE_SPI_MSB (0)
-#define MICROPY_PY_MACHINE_SPI_LSB (1)
+#define MICROPY_PY_MACHINE_SPI_MSB (1)
+#define MICROPY_PY_MACHINE_SPI_LSB (0)
 #endif
 
 /******************************************************************************/
