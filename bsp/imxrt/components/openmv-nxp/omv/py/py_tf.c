@@ -7,6 +7,7 @@
 #include "py_helper.h"
 #include "py_image.h"
 #include "ff_wrapper.h"
+#include "py/objarray.h"
 #include "libtf.h"
 #include "libtf_person_detect_model_data.h"
 
@@ -186,6 +187,9 @@ typedef struct py_tf_model_obj {
     unsigned int model_data_len, height, width, channels;
     bool signed_or_unsigned;
     bool is_float;
+    float *tensor_buffer;
+    unsigned int tensor_buffer_len;
+    unsigned int tensor_len;
 } py_tf_model_obj_t;
 
 STATIC void py_tf_model_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
@@ -826,21 +830,6 @@ STATIC mp_obj_t py_tf_classify_profile(uint n_args, const mp_obj_t *args, mp_map
 
     py_tf_model_obj_t *arg_model = py_tf_load_alloc(args[0]);
     image_t *arg_img = py_helper_arg_to_image_mutable(args[1]);
-
-    rectangle_t roi;
-    py_helper_keyword_rectangle_roi(arg_img, n_args, args, 2, kw_args, &roi);
-
-    float arg_min_scale = py_helper_keyword_float(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_min_scale), 1.0f);
-    PY_ASSERT_TRUE_MSG((0.0f < arg_min_scale) && (arg_min_scale <= 1.0f), "0 < min_scale <= 1");
-
-    float arg_scale_mul = py_helper_keyword_float(n_args, args, 4, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_scale_mul), 0.5f);
-    PY_ASSERT_TRUE_MSG((0.0f <= arg_scale_mul) && (arg_scale_mul < 1.0f), "0 <= scale_mul < 1");
-
-    float arg_x_overlap = py_helper_keyword_float(n_args, args, 5, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_x_overlap), 0.0f);
-    PY_ASSERT_TRUE_MSG(((0.0f <= arg_x_overlap) && (arg_x_overlap < 1.0f)) || (arg_x_overlap == -1.0f), "0 <= x_overlap < 1");
-
-    float arg_y_overlap = py_helper_keyword_float(n_args, args, 6, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_y_overlap), 0.0f);
-    PY_ASSERT_TRUE_MSG(((0.0f <= arg_y_overlap) && (arg_y_overlap < 1.0f)) || (arg_y_overlap == -1.0f), "0 <= y_overlap < 1");
 	
 	int offset = py_helper_keyword_int(n_args, args, 7, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_offset), 128);	
 	int fscale = py_helper_keyword_int(n_args, args, 8, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_scale), 128);
@@ -851,54 +840,24 @@ STATIC mp_obj_t py_tf_classify_profile(uint n_args, const mp_obj_t *args, mp_map
     mp_obj_t objects_list = mp_obj_new_list(0, NULL);
 
     g_tf_profiling_en = 1;
+    py_tf_input_data_callback_data_t py_tf_input_data_callback_data;
+    rectangle_t new_roi;
+    rectangle_init(&new_roi, 0, 0, arg_img->w, arg_img->h);
+    py_tf_input_data_callback_data.img = arg_img;
+    py_tf_input_data_callback_data.roi = &new_roi;
+    py_tf_input_data_callback_data.offset = offset;
+    py_tf_input_data_callback_data.scale = fscale;
+    py_tf_classify_output_data_callback_data_t py_tf_classify_output_data_callback_data;
+    PY_ASSERT_FALSE_MSG(libtf_invoke(arg_model->model_data,
+                                        tensor_arena,
+                                        tensor_arena_size,
+                                        py_tf_input_data_callback,
+                                        &py_tf_input_data_callback_data,
+                                        py_tf_profile_output_data_callback,
+                                        &py_tf_classify_output_data_callback_data),
+                        py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));
 
-    for (float scale = 1.0f; scale >= arg_min_scale; scale *= arg_scale_mul) {
-        // Either provide a subtle offset to center multiple detection windows or center the only detection window.
-        for (int y = roi.y + ((arg_y_overlap != -1.0f) ? (fmodf(roi.h, (roi.h * scale)) / 2.0f) : ((roi.h - (roi.h * scale)) / 2.0f));
-            // Finish when the detection window is outside of the ROI.
-            (y + (roi.h * scale)) <= (roi.y + roi.h);
-            // Step by an overlap amount accounting for scale or just terminate after one iteration.
-            y += ((arg_y_overlap != -1.0f) ? (roi.h * scale * (1.0f - arg_y_overlap)) : roi.h)) {
-            // Either provide a subtle offset to center multiple detection windows or center the only detection window.
-            for (int x = roi.x + ((arg_x_overlap != -1.0f) ? (fmodf(roi.w, (roi.w * scale)) / 2.0f) : ((roi.w - (roi.w * scale)) / 2.0f));
-                // Finish when the detection window is outside of the ROI.
-                (x + (roi.w * scale)) <= (roi.x + roi.w);
-                // Step by an overlap amount accounting for scale or just terminate after one iteration.
-                x += ((arg_x_overlap != -1.0f) ? (roi.w * scale * (1.0f - arg_x_overlap)) : roi.w)) {
 
-                rectangle_t new_roi;
-                rectangle_init(&new_roi, x, y, roi.w * scale, roi.h * scale);
-
-                if (rectangle_overlap(&roi, &new_roi)) { // Check if new_roi is null...
-
-                    py_tf_input_data_callback_data_t py_tf_input_data_callback_data;
-                    py_tf_input_data_callback_data.img = arg_img;
-                    py_tf_input_data_callback_data.roi = &new_roi;
-					py_tf_input_data_callback_data.offset = offset;
-					py_tf_input_data_callback_data.scale = fscale;
-                    py_tf_classify_output_data_callback_data_t py_tf_classify_output_data_callback_data;
-                    PY_ASSERT_FALSE_MSG(libtf_invoke(arg_model->model_data,
-                                                     tensor_arena,
-                                                     tensor_arena_size,
-                                                     py_tf_input_data_callback,
-                                                     &py_tf_input_data_callback_data,
-                                                     py_tf_profile_output_data_callback,
-                                                     &py_tf_classify_output_data_callback_data),
-                                        py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));
-
-		
-                    py_tf_classification_obj_t *o = m_new_obj(py_tf_classification_obj_t);
-                    o->base.type = &py_tf_classification_type;
-                    o->x = mp_obj_new_int(new_roi.x);
-                    o->y = mp_obj_new_int(new_roi.y);
-                    o->w = mp_obj_new_int(new_roi.w);
-                    o->h = mp_obj_new_int(new_roi.h);
-                    o->output = py_tf_classify_output_data_callback_data.out;
-                    mp_obj_list_append(objects_list, o);
-                }
-            }
-        }
-    }
     g_tf_profiling_en = 0;
     ShowProfiling();
     fb_alloc_free_till_mark();
@@ -1072,6 +1031,264 @@ STATIC mp_obj_t py_tf_segment(uint n_args, const mp_obj_t *args, mp_map_t *kw_ar
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_segment_obj, 2, py_tf_segment);
 
+
+typedef struct py_tf_invoke_output_data_callback_data {
+    int length;
+    mp_obj_t out;
+} py_tf_invoke_output_data_callback_data_t;
+
+#define py_tf_invoke_obj_size 3
+typedef struct py_tf_invoke_obj {
+    mp_obj_base_t base;
+    mp_obj_t during, length, output;
+} py_tf_invoke_obj_t;
+
+
+STATIC void py_tf_invoke_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind)
+{
+    py_tf_invoke_obj_t *self = self_in;
+    mp_printf(print,
+              "{\"during\":%dms, \"output length=\":%d,\"output\":",
+              mp_obj_get_int(self->during),
+              mp_obj_get_int(self->length));
+    mp_obj_print_helper(print, self->output, kind);
+    mp_printf(print, "}");
+}
+
+STATIC mp_obj_t py_tf_invoke_subscr(mp_obj_t self_in, mp_obj_t index, mp_obj_t value)
+{
+    if (value == MP_OBJ_SENTINEL) { // load
+        py_tf_invoke_obj_t *self = self_in;
+        if (MP_OBJ_IS_TYPE(index, &mp_type_slice)) {
+            mp_bound_slice_t slice;
+            if (!mp_seq_get_fast_slice_indexes(py_tf_invoke_obj_size, index, &slice)) {
+                nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "only slices with step=1 (aka None) are supported"));
+            }
+            mp_obj_tuple_t *result = mp_obj_new_tuple(slice.stop - slice.start, NULL);
+            mp_seq_copy(result->items, &(self->during) + slice.start, result->len, mp_obj_t);
+            return result;
+        }
+        switch (mp_get_index(self->base.type, py_tf_invoke_obj_size, index, false)) {
+            case 0: return self->during;
+            case 1: return self->length;
+            case 2: return self->output;
+        }
+    }
+    return MP_OBJ_NULL; // op not supported
+}
+
+mp_obj_t py_tf_invoke_during(mp_obj_t self_in) { return ((py_tf_invoke_obj_t *) self_in)->during; }
+mp_obj_t py_tf_invoke_length(mp_obj_t self_in) { return ((py_tf_invoke_obj_t *) self_in)->length; }
+mp_obj_t py_tf_invoke_output(mp_obj_t self_in) { return ((py_tf_invoke_obj_t *) self_in)->output; }
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_tf_invoke_during_obj, py_tf_invoke_during);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_tf_invoke_length_obj, py_tf_invoke_length);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_tf_invoke_output_obj, py_tf_invoke_output);
+
+STATIC const mp_rom_map_elem_t py_tf_invoke_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_during), MP_ROM_PTR(&py_tf_invoke_during_obj) },
+    { MP_ROM_QSTR(MP_QSTR_length), MP_ROM_PTR(&py_tf_invoke_length_obj) },
+    { MP_ROM_QSTR(MP_QSTR_output), MP_ROM_PTR(&py_tf_invoke_output_obj) }
+};
+
+STATIC MP_DEFINE_CONST_DICT(py_tf_invoke_locals_dict, py_tf_invoke_locals_dict_table);
+
+static const mp_obj_type_t py_tf_invoke_type = {
+    { &mp_type_type },
+    .name  = MP_QSTR_tf_invoke,
+    .print = py_tf_invoke_print,
+    .subscr = py_tf_invoke_subscr,
+    .locals_dict = (mp_obj_t) &py_tf_invoke_locals_dict
+};
+STATIC void py_tf_invoke_output_data_callback(void *callback_data,
+                                                void *model_output,
+                                                const unsigned int output_height,
+                                                const unsigned int output_width,
+                                                const unsigned int output_channels,
+                                                const bool signed_or_unsigned,
+                                                const bool is_float)
+{
+    py_tf_invoke_output_data_callback_data_t *arg = (py_tf_invoke_output_data_callback_data_t *) callback_data;
+    int shift = signed_or_unsigned ? 128 : 0;
+
+    PY_ASSERT_TRUE_MSG(output_height == 1, "Expected model output height to be 1!");
+    PY_ASSERT_TRUE_MSG(output_width == 1, "Expected model output width to be 1!");
+    float *buffer = gc_alloc(output_channels*sizeof(float),0);
+    
+    for (unsigned int i = 0; i < output_channels; i++) {
+        if (!is_float) {
+            buffer[i] = (((uint8_t *) model_output)[i] ^ shift) / 255.0f;
+        } else {
+            buffer[i] = ((float *) model_output)[i];
+        }
+    }
+
+    arg->out = mp_obj_new_bytearray_by_ref(output_channels*sizeof(float),buffer);
+}
+STATIC mp_obj_t py_tf_invoke(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+{
+    fb_alloc_mark();
+    alloc_putchar_buffer();
+
+    py_tf_model_obj_t *arg_model = py_tf_load_alloc(args[0]);
+    image_t *arg_img = py_helper_arg_to_image_mutable(args[1]);
+	
+	rectangle_t roi;
+    py_helper_keyword_rectangle_roi(arg_img, n_args, args, 2, kw_args, &roi);
+	
+	int offset = py_helper_keyword_int(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_offset), 128);	
+	int fscale = py_helper_keyword_int(n_args, args, 4, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_scale), 128);
+	int bgr_mode = py_helper_keyword_int(n_args, args, 5, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_bgr), 0);
+	
+    uint32_t tensor_arena_size;
+    uint8_t *tensor_arena = fb_alloc_all(&tensor_arena_size, FB_ALLOC_PREFER_SIZE);
+
+	rectangle_t new_roi;
+	rectangle_init(&new_roi, 0, 0, roi.w, roi.h);
+
+	py_tf_input_data_callback_data_t py_tf_input_data_callback_data;
+	py_tf_input_data_callback_data.img = arg_img;
+	py_tf_input_data_callback_data.roi = &new_roi;
+	py_tf_input_data_callback_data.offset = offset;
+	py_tf_input_data_callback_data.scale = fscale;
+	py_tf_input_data_callback_data.bgr_mode = bgr_mode;
+	
+	py_tf_invoke_output_data_callback_data_t py_tf_invoke_output_data_callback_data;
+    g_tf_profiling_en = 1;
+	PY_ASSERT_FALSE_MSG(libtf_invoke(arg_model->model_data,
+									 tensor_arena,
+									 tensor_arena_size,
+									 py_tf_input_data_callback,
+									 &py_tf_input_data_callback_data,
+									 py_tf_invoke_output_data_callback,
+									 &py_tf_invoke_output_data_callback_data),
+						py_tf_putchar_buffer - (PY_TF_PUTCHAR_BUFFER_LEN - py_tf_putchar_buffer_len));		
+    g_tf_profiling_en = 0;
+
+    py_tf_invoke_obj_t *o = m_new_obj(py_tf_invoke_obj_t);
+    o->base.type = &py_tf_invoke_type;
+    o->during = mp_obj_new_int(g_usTotal/1000);
+    o->length = mp_obj_new_int(py_tf_invoke_output_data_callback_data.length);
+    o->output = py_tf_invoke_output_data_callback_data.out;
+
+    fb_alloc_free_till_mark();
+
+    return o;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_invoke_obj, 2, py_tf_invoke);
+
+STATIC mp_obj_t py_tf_alloc_float_tensor(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+{
+    py_tf_model_obj_t *self_in;
+    if (MP_OBJ_IS_TYPE(args[0], &py_tf_model_type)) {
+        self_in = (py_tf_model_obj_t *) args[0];
+    } else{
+        return mp_const_none;
+    }
+    
+    int len = py_helper_keyword_int(n_args, args, 1, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_length), 128);
+    self_in->tensor_buffer = gc_alloc(len*sizeof(float),0);
+    memset(self_in->tensor_buffer,0x0,sizeof(float)*len);
+    self_in->tensor_buffer_len = len;
+
+    return mp_obj_new_int(len);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_alloc_obj, 1, py_tf_alloc_float_tensor);
+
+STATIC mp_obj_t py_tf_add_float_tensor(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+{
+    py_tf_model_obj_t *self_in;
+    if (MP_OBJ_IS_TYPE(args[0], &py_tf_model_type)) {
+        self_in = (py_tf_model_obj_t *) args[0];
+    } else{
+        return mp_const_none;
+    }
+    
+    if(self_in->tensor_buffer == NULL)
+    {
+        nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "TF tensor buffer is empty"));
+    }
+
+    int offset = py_helper_keyword_int(n_args, args, 2, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_offset), 0);
+    int len = py_helper_keyword_int(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_len), 128);
+    self_in->tensor_len = len;
+    float *buffer_addr = &(self_in->tensor_buffer[offset]);
+
+    py_helper_keyword_float_array(n_args, args, 1, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_tensor), buffer_addr, len);
+
+    return mp_obj_new_int(len);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_add_float_tensor_obj, 1, py_tf_add_float_tensor);
+
+STATIC float py_tf_calc_tensor_angle(float *tensor_x, float *tensor_y, int len)
+{
+    int32_t iM1, iM2, iDot;
+	float fM1, fM2, fDot;
+
+    iM1 = 0;
+	iM2 = 0;
+	iDot = 0;
+	
+    for (int i=0;i<len;i++)
+    {
+		int8_t x = (int8_t)(tensor_x[i]*10);
+		int8_t y = (int8_t)(tensor_y[i]*10);
+		
+        iDot += x * y;
+		iM1 += x * x;
+		iM2 +=  y * y;
+    }
+    fDot = (float) iDot;
+	fM1 = sqrtf((float)iM1);
+	fM2 = sqrtf((float)iM2);
+	if(fM1 ==0.0) fM1 = 1;
+	if(fM2 ==0.0) fM2 = 1;
+	float cosVal = fDot / (fM1 * fM2);
+	float angle = acosf(cosVal) * 180 / 3.141592654f;
+    return angle;
+}
+STATIC mp_obj_t py_tf_compare_float_tensor(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
+{
+    py_tf_model_obj_t *self_in;
+    if (MP_OBJ_IS_TYPE(args[0], &py_tf_model_type)) {
+        self_in = (py_tf_model_obj_t *) args[0];
+    } else{
+        return mp_const_none;
+    }
+    
+    if(self_in->tensor_buffer == NULL)
+    {
+        nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "TF tensor buffer is empty"));
+    }
+
+    int len = py_helper_keyword_int(n_args, args, 2, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_len), 128);
+   
+    mp_map_elem_t *kw_arg = mp_map_lookup(kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_tensor), MP_MAP_LOOKUP);
+	float *tensor;
+	mp_obj_array_t *o;
+	if(kw_arg)
+	{
+		o = (mp_obj_array_t*)kw_arg->value;
+	}
+	
+    if(!mp_obj_is_type(o,&mp_type_bytearray))
+	{
+		nlr_raise(mp_obj_new_exception_msg(&mp_type_ValueError, "tensor is not byte array"));
+	}
+	tensor= (float*)o->items;
+    int count = self_in->tensor_buffer_len / len;
+    mp_obj_t tmp_list = mp_obj_new_list(count, NULL);
+    for (int i=0;i<count;i++)
+    {
+        float *tensor_buf = &(self_in->tensor_buffer[i*len]);
+        float angle = py_tf_calc_tensor_angle(tensor_buf,tensor,len);
+        ((mp_obj_list_t *)tmp_list)->items[i] = mp_obj_new_float(angle); 
+    }
+
+    return tmp_list;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_compare_float_tensor_obj, 1, py_tf_compare_float_tensor);
+
 mp_obj_t py_tf_len(mp_obj_t self_in) { return mp_obj_new_int(((py_tf_model_obj_t *) self_in)->model_data_len); }
 mp_obj_t py_tf_height(mp_obj_t self_in) { return mp_obj_new_int(((py_tf_model_obj_t *) self_in)->height); }
 mp_obj_t py_tf_width(mp_obj_t self_in) { return mp_obj_new_int(((py_tf_model_obj_t *) self_in)->width); }
@@ -1098,6 +1315,7 @@ STATIC const mp_rom_map_elem_t locals_dict_table[] = {
 	{ MP_ROM_QSTR(MP_QSTR_regress),        MP_ROM_PTR(&py_tf_logistic_obj) },
     { MP_ROM_QSTR(MP_QSTR_profile), MP_ROM_PTR(&py_tf_classify_profile_obj)},
     { MP_ROM_QSTR(MP_QSTR_detect),          MP_ROM_PTR(&py_tf_detect_obj) },
+    
     { MP_ROM_QSTR(MP_QSTR_segment), MP_ROM_PTR(&py_tf_segment_obj) }
 };
 
@@ -1123,6 +1341,11 @@ STATIC const mp_rom_map_elem_t globals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_profile),         MP_ROM_PTR(&py_tf_classify_profile_obj)},
     { MP_ROM_QSTR(MP_QSTR_detect),          MP_ROM_PTR(&py_tf_detect_obj) },
     { MP_ROM_QSTR(MP_QSTR_segment),         MP_ROM_PTR(&py_tf_segment_obj) },
+    { MP_ROM_QSTR(MP_QSTR_invoke),         MP_ROM_PTR(&py_tf_invoke_obj) },
+    { MP_ROM_QSTR(MP_QSTR_alloc_float_tensor),MP_ROM_PTR(&py_tf_alloc_obj) },
+    { MP_ROM_QSTR(MP_QSTR_add_float_tensor),MP_ROM_PTR(&py_tf_add_float_tensor_obj) },
+    { MP_ROM_QSTR(MP_QSTR_compare_float_tensor),MP_ROM_PTR(&py_tf_compare_float_tensor_obj) },
+   
 #else
     { MP_ROM_QSTR(MP_QSTR_load),            MP_ROM_PTR(&py_func_unavailable_obj) },
     { MP_ROM_QSTR(MP_QSTR_free_from_fb),    MP_ROM_PTR(&py_func_unavailable_obj) },
