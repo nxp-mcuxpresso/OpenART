@@ -589,7 +589,7 @@ static int set_auto_gain(sensor_t *sensor, int enable, float gain_db, float gain
 
 static int get_gain_db(sensor_t *sensor, float *gain_db)
 {
-    uint16_t gain;
+    uint32_t gain;
 
     cambus_readws(sensor, MT9M114_VAR_UVC_GAIN_CONTROL, &gain,2);
 
@@ -620,7 +620,7 @@ static int set_auto_exposure(sensor_t *sensor, int enable, int exposure_us)
 
 static int get_exposure_us(sensor_t *sensor, int *exposure_us)
 {
-	uint16_t reg_h, reg_l;
+	uint32_t reg_h, reg_l;
 
     cambus_readws(sensor, MT9M114_VAR_UVC_EXPOSURE_TIME_ABSOLUTE_CONTROL, &reg_h,2);
 
@@ -649,7 +649,7 @@ static int get_rgb_gain_db(sensor_t *sensor, float *r_gain_db, float *g_gain_db,
 
 static int set_hmirror(sensor_t *sensor, int enable)
 {
-    uint16_t reg_data;
+    uint32_t reg_data;
 
     cambus_readws(sensor, MT9M114_VAR_CAM_SENSOR_CONTROL_READ_MODE, &reg_data,2);
 
@@ -664,7 +664,7 @@ static int set_hmirror(sensor_t *sensor, int enable)
 
 static int set_vflip(sensor_t *sensor, int enable)
 {
-    uint16_t reg_data;
+    uint32_t reg_data;
 
     cambus_readws(sensor, MT9M114_VAR_CAM_SENSOR_CONTROL_READ_MODE, &reg_data,2);
 
