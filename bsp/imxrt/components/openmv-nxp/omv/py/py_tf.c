@@ -1124,7 +1124,7 @@ STATIC void py_tf_invoke_output_data_callback(void *callback_data,
 	list_shape->items[2] = mp_obj_new_int(output_width);
 	list_shape->items[3] = mp_obj_new_int(output_channels);
 	
-	output_list->items[0] = mp_obj_new_bytearray_by_ref(size, buffer);
+	output_list->items[0] = mp_obj_new_bytearray_by_ref(size*sizeof(float), buffer);
 	output_list->items[1] = list_shape;
 		
 	mp_obj_list_append(arg->out, output_list);
@@ -1160,6 +1160,7 @@ STATIC mp_obj_t py_tf_invoke(uint n_args, const mp_obj_t *args, mp_map_t *kw_arg
 	py_tf_input_data_callback_data.bgr_mode = bgr_mode;
 	
 	py_tf_invoke_output_data_callback_data_t py_tf_invoke_output_data_callback_data;
+    py_tf_invoke_output_data_callback_data.out = mp_obj_new_list(0, NULL);
     g_tf_profiling_en = 1;
 	PY_ASSERT_FALSE_MSG(libtf_invoke(arg_model->model_data,
 									 tensor_arena,
@@ -1217,6 +1218,13 @@ STATIC mp_obj_t py_tf_add_float_tensor(uint n_args, const mp_obj_t *args, mp_map
     int offset = py_helper_keyword_int(n_args, args, 2, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_offset), 0);
     int len = py_helper_keyword_int(n_args, args, 3, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_len), 128);
     self_in->tensor_len = len;
+
+    if(offset >= self_in->tensor_buffer_len)
+    {
+        self_in->tensor_buffer_len += len;
+        self_in->tensor_buffer = gc_realloc(self_in->tensor_buffer,self_in->tensor_buffer_len*sizeof(float),1);
+    }
+
     float *buffer_addr = &(self_in->tensor_buffer[offset]);
 
     py_helper_keyword_float_array(n_args, args, 1, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_tensor), buffer_addr, len);
