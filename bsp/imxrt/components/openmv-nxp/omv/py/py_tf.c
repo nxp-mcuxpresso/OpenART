@@ -1033,14 +1033,13 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_tf_segment_obj, 2, py_tf_segment);
 
 
 typedef struct py_tf_invoke_output_data_callback_data {
-    int length;
     mp_obj_t out;
 } py_tf_invoke_output_data_callback_data_t;
 
 #define py_tf_invoke_obj_size 3
 typedef struct py_tf_invoke_obj {
     mp_obj_base_t base;
-    mp_obj_t during, length, output;
+    mp_obj_t during, output;
 } py_tf_invoke_obj_t;
 
 
@@ -1048,9 +1047,8 @@ STATIC void py_tf_invoke_print(const mp_print_t *print, mp_obj_t self_in, mp_pri
 {
     py_tf_invoke_obj_t *self = self_in;
     mp_printf(print,
-              "{\"during\":%dms, \"output length=\":%d,\"output\":",
-              mp_obj_get_int(self->during),
-              mp_obj_get_int(self->length));
+              "{\"during\":%dms",
+              mp_obj_get_int(self->during));
     mp_obj_print_helper(print, self->output, kind);
     mp_printf(print, "}");
 }
@@ -1070,7 +1068,6 @@ STATIC mp_obj_t py_tf_invoke_subscr(mp_obj_t self_in, mp_obj_t index, mp_obj_t v
         }
         switch (mp_get_index(self->base.type, py_tf_invoke_obj_size, index, false)) {
             case 0: return self->during;
-            case 1: return self->length;
             case 2: return self->output;
         }
     }
@@ -1078,16 +1075,13 @@ STATIC mp_obj_t py_tf_invoke_subscr(mp_obj_t self_in, mp_obj_t index, mp_obj_t v
 }
 
 mp_obj_t py_tf_invoke_during(mp_obj_t self_in) { return ((py_tf_invoke_obj_t *) self_in)->during; }
-mp_obj_t py_tf_invoke_length(mp_obj_t self_in) { return ((py_tf_invoke_obj_t *) self_in)->length; }
 mp_obj_t py_tf_invoke_output(mp_obj_t self_in) { return ((py_tf_invoke_obj_t *) self_in)->output; }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_tf_invoke_during_obj, py_tf_invoke_during);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_tf_invoke_length_obj, py_tf_invoke_length);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(py_tf_invoke_output_obj, py_tf_invoke_output);
 
 STATIC const mp_rom_map_elem_t py_tf_invoke_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_during), MP_ROM_PTR(&py_tf_invoke_during_obj) },
-    { MP_ROM_QSTR(MP_QSTR_length), MP_ROM_PTR(&py_tf_invoke_length_obj) },
     { MP_ROM_QSTR(MP_QSTR_output), MP_ROM_PTR(&py_tf_invoke_output_obj) }
 };
 
@@ -1108,12 +1102,11 @@ STATIC void py_tf_invoke_output_data_callback(void *callback_data,
                                                 const bool signed_or_unsigned,
                                                 const bool is_float)
 {
-    py_tf_invoke_output_data_callback_data_t *arg = (py_tf_invoke_output_data_callback_data_t *) callback_data;
     int shift = signed_or_unsigned ? 128 : 0;
 
-    PY_ASSERT_TRUE_MSG(output_height == 1, "Expected model output height to be 1!");
-    PY_ASSERT_TRUE_MSG(output_width == 1, "Expected model output width to be 1!");
-    float *buffer = gc_alloc(output_channels*sizeof(float),0);
+    py_tf_invoke_output_data_callback_data_t *arg = (py_tf_invoke_output_data_callback_data_t *) callback_data;
+    uint32_t size = output_height * output_width * output_channels;
+	float* buffer = (float*)xalloc(sizeof(float) * size);
     
     for (unsigned int i = 0; i < output_channels; i++) {
         if (!is_float) {
@@ -1122,8 +1115,21 @@ STATIC void py_tf_invoke_output_data_callback(void *callback_data,
             buffer[i] = ((float *) model_output)[i];
         }
     }
-
-    arg->out = mp_obj_new_bytearray_by_ref(output_channels*sizeof(float),buffer);
+	
+	mp_obj_list_t* output_list = mp_obj_new_list(2, NULL);
+	
+	mp_obj_list_t* list_shape = mp_obj_new_list(4, NULL);
+	list_shape->items[0] = mp_obj_new_int(1);
+	list_shape->items[1] = mp_obj_new_int(output_height);
+	list_shape->items[2] = mp_obj_new_int(output_width);
+	list_shape->items[3] = mp_obj_new_int(output_channels);
+	
+	output_list->items[0] = mp_obj_new_bytearray_by_ref(size, buffer);
+	output_list->items[1] = list_shape;
+		
+	mp_obj_list_append(arg->out, output_list);
+	
+	return;
 }
 STATIC mp_obj_t py_tf_invoke(uint n_args, const mp_obj_t *args, mp_map_t *kw_args)
 {
@@ -1168,7 +1174,6 @@ STATIC mp_obj_t py_tf_invoke(uint n_args, const mp_obj_t *args, mp_map_t *kw_arg
     py_tf_invoke_obj_t *o = m_new_obj(py_tf_invoke_obj_t);
     o->base.type = &py_tf_invoke_type;
     o->during = mp_obj_new_int(g_usTotal/1000);
-    o->length = mp_obj_new_int(py_tf_invoke_output_data_callback_data.length);
     o->output = py_tf_invoke_output_data_callback_data.out;
 
     fb_alloc_free_till_mark();
